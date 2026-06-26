@@ -1,0 +1,164 @@
+[
+  {
+    "product_name": "ASP11-1A Digital Lab Syringe Pump",
+    "device_type": "Syringe Pump",
+    "category": "PatientMonitoring",
+    "manufacturer": "Longer Pump",
+    "source_type": "dynamic_search",
+    "dynamic_search": true,
+    "reason": "Scrape failed — product page returned no content"
+  },
+  {
+    "product_name": "dLSP 520 Pro Digital Lab Syringe Pump",
+    "device_type": "Syringe Pump",
+    "category": "PatientMonitoring",
+    "manufacturer": "Longer Pump",
+    "source_type": "dynamic_search",
+    "dynamic_search": true,
+    "reason": "Scrape failed — product page returned no content"
+  },
+  {
+    "product_name": "Infusion Pump",
+    "device_type": "Infusion Pump",
+    "category": "PatientMonitoring",
+    "manufacturer": "Generic",
+    "source_type": "dynamic_search",
+    "dynamic_search": true,
+    "reason": "Reference URL only — Wikipedia page, not a manufacturer product page"
+  },
+  {
+    "product_name": "Fluid Warmer",
+    "device_type": "Fluid Warmer",
+    "category": "PatientMonitoring",
+    "manufacturer": "Generic",
+    "source_type": "dynamic_search",
+    "dynamic_search": true,
+    "reason": "Reference URL only — ScienceDirect academic page, blocked scrape"
+  },
+  {
+    "product_name": "Holter Monitor",
+    "device_type": "Holter Monitor",
+    "category": "Cardiology",
+    "manufacturer": "Generic",
+    "source_type": "dynamic_search",
+    "dynamic_search": true,
+    "reason": "Access Denied — Mayo Clinic blocked scraping request"
+  },
+  {
+    "product_name": "24-Hour Ambulatory Blood Pressure Monitoring",
+    "device_type": "Ambulatory Blood Pressure Monitor",
+    "category": "Cardiology",
+    "manufacturer": "Generic",
+    "source_type": "dynamic_search",
+    "dynamic_search": true,
+    "reason": "Reference URL only — Cleveland Clinic informational page, not a product page"
+  },
+  {
+    "product_name": "Ambu SPUR II Disposable Resuscitator",
+    "device_type": "Disposable Resuscitator",
+    "category": "Anaesthesia",
+    "manufacturer": "Ambu",
+    "source_type": "dynamic_search",
+    "dynamic_search": true,
+    "reason": "Scrape returned empty description — no usable product content extracted"
+  },
+  {
+    "product_name": "Ambu Mark IV Reusable Resuscitator",
+    "device_type": "Reusable Resuscitator",
+    "category": "Anaesthesia",
+    "manufacturer": "Ambu",
+    "source_type": "dynamic_search",
+    "dynamic_search": true,
+    "reason": "Scrape returned empty description — no usable product content extracted"
+  },
+  {
+    "product_name": "Laryngoscope",
+    "device_type": "Laryngoscope",
+    "category": "Anaesthesia",
+    "manufacturer": "Generic",
+    "source_type": "dynamic_search",
+    "dynamic_search": true,
+    "reason": "Reference URL only — ScienceDirect academic page, blocked scrape"
+  },
+  {
+    "product_name": "Video Laryngoscope",
+    "device_type": "Video Laryngoscope",
+    "category": "Anaesthesia",
+    "manufacturer": "Generic",
+    "source_type": "dynamic_search",
+    "dynamic_search": true,
+    "reason": "Reference URL only — PubMed article, not a manufacturer product page"
+  },
+  {
+    "product_name": "Classic LED 50 Surgery Light",
+    "device_type": "Surgical Light",
+    "category": "OTComplex",
+    "manufacturer": "Hospedia Medicare",
+    "source_type": "dynamic_search",
+    "dynamic_search": true,
+    "reason": "Website blocked scraping request — returned 406 Not Acceptable"
+  },
+  {
+    "product_name": "Surgical Table",
+    "device_type": "OT Table",
+    "category": "OTComplex",
+    "manufacturer": "Hospedia Medicare",
+    "source_type": "dynamic_search",
+    "dynamic_search": true,
+    "reason": "Website blocked scraping request — returned 406 Not Acceptable"
+  },
+  {
+    "product_name": "Pulse Oximeter",
+    "device_type": "Pulse Oximeter",
+    "category": "MotherChildCare",
+    "manufacturer": "Generic",
+    "source_type": "dynamic_search",
+    "dynamic_search": true,
+    "reason": "Reference URL only — PubMed article, not a manufacturer product page"
+  },
+  {
+    "product_name": "Infant Radiant Warmer Opera",
+    "device_type": "Radiant Warmer",
+    "category": "MotherChildCare",
+    "manufacturer": "Niceneo Tech",
+    "source_type": "dynamic_search",
+    "dynamic_search": true,
+    "reason": "Scrape returned empty description — blog URL, no usable product content extracted"
+  },
+  {
+    "product_name": "Phototherapy",
+    "device_type": "Phototherapy System",
+    "category": "MotherChildCare",
+    "manufacturer": "Generic",
+    "source_type": "dynamic_search",
+    "dynamic_search": true,
+    "reason": "Reference URL only — Cleveland Clinic informational page, not a product page"
+  },
+  {
+    "product_name": "Bubble CPAP System",
+    "device_type": "Bubble CPAP System",
+    "category": "MotherChildCare",
+    "manufacturer": "Generic",
+    "source_type": "dynamic_search",
+    "dynamic_search": true,
+    "reason": "Reference URL only — NIH Bookshelf page, not a manufacturer product page"
+  },
+  {
+    "product_name": "Neonatal Ventilator",
+    "device_type": "Neonatal Ventilator",
+    "category": "MotherChildCare",
+    "manufacturer": "Generic",
+    "source_type": "dynamic_search",
+    "dynamic_search": true,
+    "reason": "Website blocked scraping request — int-bio.com returned access denied"
+  },
+  {
+    "product_name": "Neonatal Ventilator",
+    "device_type": "Neonatal Ventilator",
+    "category": "MotherChildCare",
+    "manufacturer": "Draeger",
+    "source_type": "dynamic_search",
+    "dynamic_search": true,
+    "reason": "Scrape returned empty description — Draeger product finder page requires JavaScript rendering"
+  }
+]

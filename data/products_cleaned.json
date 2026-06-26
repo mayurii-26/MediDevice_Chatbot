@@ -1,0 +1,217 @@
+[
+  {
+    "product_name": "Single-patient, pediatric/adult SpO2 clip sensor",
+    "category": "Pulse Oximetry Sensor",
+    "description": "The disposable Philips M1131A adult and pediatric clip sensor is made with a soft, semi-rigid silicone body. Manufactured without latex, it clips securely on any finger except the thumb on patients weighing more than 20 kg (44 lbs).",
+    "features": [
+      {
+        "title": "Preferred by nurses",
+        "description": "In a comparative study on 133 patients, 78% of nurses reported preferring the Philips M1131A sensor over a competitive sensor."
+      },
+      {
+        "title": "Adult and pediatric capability",
+        "description": "The M1131A can be used on both adult and pediatric patients, simplifying SpO2 sensor inventory management."
+      },
+      {
+        "title": "Designed for FAST-SpO2",
+        "description": "Sensors are designed for Philips proprietary FAST-SpO2 (Fourier Artifact Suppression Technology) algorithm, reducing effects from patient movement, electronic interference, ambient light, and low perfusion."
+      }
+    ],
+    "specifications": {
+      "Patient Application": "Child; Adult",
+      "Recommended Patient Weight": "Greater than 40 kg (>88 lb)",
+      "Cable Length": "45 cm (17.7'')",
+      "Use with Non-Philips Products": "No",
+      "Use with Philips Equipment": "863265, 863276, 863278, M1020B, M2703A, M2704A, M2705A, M3001A, M3002A, M3535A, M3536A, M3536M, M8102A, M8105A, M8105AS",
+      "Sterile or Non-Sterile": "Non-Sterile",
+      "Package Weight": "0.275 kg",
+      "Minimum Shelf Life": "None",
+      "CE Certified": "Yes",
+      "Product Category": "SpO2",
+      "Product Type": "Sensor",
+      "Application Site": "Finger",
+      "Packaging Unit": "20 sensors",
+      "Adapter Cable Compatibility": "M1943A; M1943AL",
+      "Single-Patient Use OR Multi-Patient Use": "Single-Patient Use"
+    }
+  },
+  {
+    "product_name": "Affiniti 30",
+    "category": "Ultrasound System",
+    "description": "The Philips Affiniti 30 is a balanced ultrasound system delivering reliable, high-quality images with an intuitive user interface and ergonomic design. It provides accurate diagnostic information quickly, supports high patient throughput, and integrates advanced imaging technologies suitable for routine and complex scans.",
+    "features": [
+      {
+        "title": "Designed for balance",
+        "description": "Affiniti offers an all-in-one ultrasound solution that is non-invasive and cost-effective, delivering liver fat quantification and liver stiffness measurement. Designed to handle high patient volume with advanced functionality in an ergonomic, durable system."
+      },
+      {
+        "title": "Flow Viewer",
+        "description": "A color visualization enhancement for vasculature and fetal heart architecture that provides a 3D-like rendering of flow imaging data. Available in all color imaging modes including CFM, CPA, CPAd, MFI, and MFI HD."
+      },
+      {
+        "title": "Next Gen Auto Scan",
+        "description": "Improves image uniformity by adaptively adjusting image brightness at every pixel in real-time, reducing user adjustments and improving transducer plunkability. Reduces button pushes by up to 54% with pixel-by-pixel optimization."
+      }
+    ],
+    "specifications": {
+      "Width": "57.2 cm",
+      "Height": "142.2-162.6 cm",
+      "Depth": "98.3 cm",
+      "Weight": "83.6 kg",
+      "Monitor Size": "54.6 cm",
+      "Degrees of Movement": "180 degrees",
+      "Height Adjustment": "20.3 cm"
+    }
+  },
+  {
+    "product_name": "IntelliVue MX550",
+    "category": "Patient Monitor",
+    "description": "The IntelliVue MX550 pairs powerful bedside monitoring with the reassurance of a battery backup. Supplying comprehensive patient information at a glance, it can make a real difference when multiple patients and priorities need attention.",
+    "features": [
+      {
+        "title": "15-inch wide touchscreen",
+        "description": "A large 15-inch wide touchscreen with a familiar, easy-to-use interface consistent with existing IntelliVue monitors, enabling quick access to information and reducing device training time."
+      },
+      {
+        "title": "Ambient light adjustment",
+        "description": "The display automatically adapts to ambient lighting changes, including OR conditions where lights are dimmed or brightened during different surgical stages, reducing overall light pollution."
+      },
+      {
+        "title": "EMR connectivity",
+        "description": "Shares data with clinical information systems to support comprehensive EMR records. Optional Philips IntelliBridge device interfacing eliminates the need for a separate device concentrator and data consolidation server."
+      }
+    ],
+    "specifications": {}
+  },
+  {
+    "product_name": "Efficia CM120",
+    "category": "Patient Monitor",
+    "description": "The Efficia CM120 is a portable and intuitive patient monitor built around time-tested physiological measurement algorithms. Designed with clinical workflows in mind, most functions are accessible in three clicks or fewer. Available in various configurations to meet different clinical needs while staying within budget.",
+    "features": [
+      {
+        "title": "Range of screen sizes",
+        "description": "Available in multiple screen size configurations to accommodate different clinical environments and user preferences."
+      },
+      {
+        "title": "Time-tested physiological measurements",
+        "description": "Relies on physiological measurement algorithms trusted for over 300 million patients every year, ensuring confidence in clinical results."
+      },
+      {
+        "title": "Solidly built and reliable",
+        "description": "Designed for durability and reliability in demanding clinical environments, supporting efficient quality care delivery."
+      }
+    ],
+    "specifications": {}
+  },
+  {
+    "product_name": "HeartStart FRx AED",
+    "category": "AED",
+    "description": "The Philips HeartStart FRx defibrillator features intuitive, step-by-step voice instructions including CPR guidance and an audible metronome to help guide basic life support (BLS) responders while treating a suspected sudden cardiac arrest (SCA). Pre-connected SMART Pads II can be used for both adults and children. Rugged, lightweight and reliable, it can withstand rough handling and extreme temperatures.",
+    "features": [],
+    "specifications": {}
+  },
+  {
+    "product_name": "Mainstream etCO2 Sensor",
+    "category": "Capnography",
+    "description": "The Philips Mainstream etCO2 sensor is a multi-patient use capnography sensor that uses mainstream gas capnography technology. It is compatible with select Philips monitoring equipment and is CE certified for clinical use.",
+    "features": [],
+    "specifications": {
+      "Technology": "Gas Capnography",
+      "Measurement Type": "Mainstream",
+      "Use with Philips Healthcare Equipment": "M2501A, M2533A, M2536A, M2513A, M2516A",
+      "Use with Non-Philips Healthcare Equipment": "No",
+      "Product Category": "Gas",
+      "Product Type": "Capnography",
+      "CE Certified": "Yes",
+      "Single-Patient Use OR Multi-Patient Use": "Multi-Patient Use",
+      "Package Weight": "0.300 kg",
+      "Packaging Unit": "1 box = 1 sensor",
+      "Not Manufactured with Natural Rubber Latex": "Yes",
+      "Sterile OR Non-Sterile": "Non-Sterile",
+      "Minimum Shelf Life": "None"
+    }
+  },
+  {
+    "product_name": "Live 3D Transesophageal Echo (TEE)",
+    "category": "Ultrasound System",
+    "description": "With Live 3D TEE, cardiologists, cardiac surgeons, anesthesiologists, interventional cardiologists, and echocardiographers can see cardiac structure and function in real-time. It is quick, reproducible, and quantifiable.",
+    "features": [
+      {
+        "title": "Structure and function visualization",
+        "description": "Ability to view cardiac structure and function in action, even in hard-to-image patients."
+      },
+      {
+        "title": "Device implantation visualization",
+        "description": "Provides clear visualization to support and guide device implantation procedures."
+      },
+      {
+        "title": "Complete valve viewing",
+        "description": "Ability to see the complete valve from multiple perspectives while the heart is beating."
+      }
+    ],
+    "specifications": {}
+  },
+  {
+    "product_name": "Avalon CL",
+    "category": "Fetal Monitor",
+    "description": "Avalon CL is a cableless maternal and fetal monitoring system that allows mothers to move freely during labor while providing continuous fetal monitoring. It supports wireless monitoring of fetal heart rate for twins and triplets alongside maternal NBP and SpO2, using patented Smart Pulse technology to detect and separate maternal and fetal heart rates.",
+    "features": [
+      {
+        "title": "Cableless freedom of movement",
+        "description": "Allows mothers to move freely during labor and offers flexible birthing options without cable clutter, enabling clinicians to focus on patient care."
+      },
+      {
+        "title": "Twin and triplet monitoring",
+        "description": "Supports continuous wireless monitoring of fetal heart rate for twins and triplets along with maternal NBP and SpO2. Smart Pulse technology automatically compares maternal pulse and multiple fetal heart rates to maintain separation."
+      },
+      {
+        "title": "Wireless OB department integration",
+        "description": "Works with Avalon fetal monitors via cableless transducers and a base station. Patient information can be transferred to the IntelliSpace Perinatal information management system."
+      }
+    ],
+    "specifications": {}
+  },
+  {
+    "product_name": "Ingenia Elition 3.0T S",
+    "category": "MRI System",
+    "description": "The Ingenia Elition S delivers superb image quality and performs MRI exams up to 50% faster. Compressed SENSE accelerates both 2D and 3D scanning. High productivity is supported through SmartExam, 4D Multi-Transmit, and ScanWise Implant, made possible by new gradient and RF designs plus acceleration technologies. The system also offers an immersive audiovisual experience to help calm patients and guide them through exams.",
+    "features": [
+      {
+        "title": "Multi-Transmit RF",
+        "description": "Philips was the first to introduce Multi-Transmit RF to 3.0T imaging in 2008. Two RF amplifiers are standard, supporting consistent 3.0T image quality throughout the body."
+      },
+      {
+        "title": "Up to 60% higher spatial resolution",
+        "description": "Fully redesigned gradients combined with Compressed SENSE allow up to 60% higher spatial resolution in the same scan time, enabling a shift from multi-orientation 2D imaging to a single high-resolution 3D scan."
+      },
+      {
+        "title": "SmartSpeed AI acceleration",
+        "description": "SmartSpeed delivers image quality and speed via AI technology and Compressed SENSE, increasing imaging speed by up to 3x, providing up to 65% greater resolution, and covering motion imaging, implant imaging, free-breathing imaging, and diffusion-weighted imaging across 97% of clinical protocols."
+      }
+    ],
+    "specifications": {}
+  },
+  {
+    "product_name": "Long Complete Lead Set IEC",
+    "category": "Cardiograph",
+    "description": "Long complete shielded lead set for PageWriter TC Series Cardiographs, IEC color coded with banana posts. Includes 2 long arm leads (54\"/1.37m), 2 long leg leads (56\"/1.42m), 2 long 1-into-3 Trident leads (42\"/1.07m), 2 lead separators, 10 banana post adapters, 2 Trident Yoke labels, 4 colored clips, 14 colored rings, 6 white base rings, and instructions for use. Sold as 1 complete lead set per unit.",
+    "features": [],
+    "specifications": {
+      "Patient Application": "Child; Adult",
+      "Application Site": "Limb; Chest",
+      "Shielded": "Yes",
+      "Electrode Attachment Method": "Alligator Clip",
+      "Color Coding": "IEC",
+      "Use with Non-Philips Healthcare Equipment": "No",
+      "Use with Philips Healthcare Equipment": "860315, 860310",
+      "Product Category": "ECG",
+      "Product Type": "Diagnostic ECG Patient Cables and Leads",
+      "Single-Patient Use OR Multi-Patient Use": "Multi-Patient Use",
+      "CE Certified": "Yes",
+      "Packaging Unit": "1",
+      "Not Manufactured with Natural Rubber Latex": "Yes",
+      "Sterile OR Non-Sterile": "Non-Sterile",
+      "Minimum Shelf Life": "None"
+    }
+  }
+]

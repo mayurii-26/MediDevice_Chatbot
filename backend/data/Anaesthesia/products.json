@@ -1,0 +1,20 @@
+[
+  {
+    "product_name": "E-Flo 6 Anaesthesia Workstation",
+    "device_type": "Anaesthesia Workstation",
+    "category": "Anaesthesia",
+    "description": "BPL E-Flo 6 comes with the latest refinements in ergonomics and systems integration with an advanced, easy-to-use anaesthesia platform designed by experts to streamline your anaesthesia workflow.",
+    "url": "https://www.bplmedicaltechnologies.com/product-details/anesthesia-workstation/e-flo-series/e-flo-6/",
+    "manufacturer": "BPL Medical",
+    "source_type": "manufacturer"
+  },
+  {
+    "product_name": "E-Flo 6C Anaesthesia Workstation",
+    "device_type": "Anaesthesia Workstation",
+    "category": "Anaesthesia",
+    "description": "The E-Flo 6C anaesthesia machine features an 8.4 inch colour TFT screen for displaying key waveforms and spirometry loops. It supports multiple ventilation modes with precise control through advanced solenoid valve technology. The machine includes a low-flow mechanical flow meter, integrated absorber, dual flow sensing, and a comprehensive alarm system. It operates on a lithium battery with up to 360 minutes of backup and is designed for both adult and paediatric use.",
+    "url": "https://www.bplmedicaltechnologies.com/product-details/anesthesia-workstation/e-flo-series/e-flo-6c/",
+    "manufacturer": "BPL Medical",
+    "source_type": "manufacturer"
+  }
+]

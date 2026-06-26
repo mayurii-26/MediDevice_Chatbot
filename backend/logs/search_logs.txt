@@ -1,0 +1,49 @@
+[2026-06-12 22:25:47] SOURCE=faiss | CONFIDENCE=1.00 | PRODUCT=PageWriter TC50 | CATEGORY=Cardiology | QUESTION=What is PageWriter TC50?
+[2026-06-12 22:30:42] SOURCE=faiss | CONFIDENCE=1.00 | PRODUCT=HeartStart FRx AED | CATEGORY=Cardiology | QUESTION=Tell me features of HeartStart FRx AED
+[2026-06-12 22:31:22] SOURCE=dynamic_search | CONFIDENCE=0.00 | PRODUCT=N/A | CATEGORY=Cardiology | QUESTION=What is Holter Monitor?
+[2026-06-12 23:20:08] SOURCE=faiss | CONFIDENCE=1.00 | PRODUCT=PageWriter TC50 | CATEGORY=Cardiology | QUESTION=What is PageWriter TC50?
+[2026-06-12 23:20:31] SOURCE=dynamic_search | CONFIDENCE=0.80 | PRODUCT=N/A | CATEGORY=Cardiology | QUESTION=What is Holter Monitor?
+[2026-06-12 23:20:49] SOURCE=faiss | CONFIDENCE=1.00 | PRODUCT=HeartStart FRx AED | CATEGORY=Cardiology | QUESTION=Tell me features of HeartStart FRx AED
+[2026-06-12 23:25:05] SOURCE=dynamic_search | CONFIDENCE=0.75 | PRODUCT=N/A | CATEGORY=Unknown | QUESTION=What is Affiniti 30?
+[2026-06-12 23:45:50] SOURCE=faiss | CONFIDENCE=0.96 | PRODUCT=Efficia DFM100 | CATEGORY=PatientMonitoring | QUESTION=What is Efficia CM120?
+[2026-06-12 23:46:13] SOURCE=faiss | CONFIDENCE=0.96 | PRODUCT=ST80i Stress Testing System | CATEGORY=PatientMonitoring | QUESTION=Tell me about Stress Test
+[2026-06-12 23:50:45] SOURCE=faiss | CONFIDENCE=0.96 | PRODUCT=Cardiac Workstation 7000 | CATEGORY=PatientMonitoring | QUESTION=Tell me about Patient Monitoring Devices
+[2026-06-13 10:13:04] SOURCE=faiss | CONFIDENCE=0.97 | PRODUCT=E-Flo 6C Anaesthesia Workstation | CATEGORY=Anaesthesia | QUESTION=What is an Anaesthesia Workstation?
+[2026-06-13 10:13:27] SOURCE=dynamic_search | CONFIDENCE=0.70 | PRODUCT=N/A | CATEGORY=Anaesthesia | QUESTION=What are the specifications of a Video Laryngoscope?
+[2026-06-13 10:27:49] SOURCE=dynamic_search | CONFIDENCE=0.77 | PRODUCT=N/A | CATEGORY=Cardiology | QUESTION=What is a Holter Monitor?
+[2026-06-13 10:28:10] SOURCE=faiss | CONFIDENCE=1.00 | PRODUCT=PageWriter TC50 | CATEGORY=Cardiology | QUESTION=What is PageWriter TC50?
+[2026-06-13 11:07:29] SOURCE=faiss | CONFIDENCE=0.95 | PRODUCT=PageWriter TC35 | CATEGORY=PatientMonitoring | QUESTION=Tell me about ECG
+[2026-06-13 11:27:32] SOURCE=dynamic_search | CONFIDENCE=0.81 | PRODUCT=N/A | CATEGORY=Anaesthesia | QUESTION=What is a Video Laryngoscope?
+[2026-06-18 22:17:52] SOURCE=faiss | CONFIDENCE=0.95 | PRODUCT=PageWriter TC35 | CATEGORY=PatientMonitoring | QUESTION=Tell me about ECG
+[2026-06-18 22:19:29] SOURCE=dynamic_search | CONFIDENCE=0.79 | PRODUCT=N/A | CATEGORY=PatientMonitoring | QUESTION=What is infusion pumps
+[2026-06-18 22:21:12] SOURCE=faiss | CONFIDENCE=0.95 | PRODUCT=E-Flo 6C Anaesthesia Workstation | CATEGORY=Anaesthesia | QUESTION=What is IntelliVue MX550?
+[2026-06-19 00:10:51] SOURCE=faiss | CONFIDENCE=0.96 | PRODUCT=Cardiac Workstation 7000 | CATEGORY=PatientMonitoring | QUESTION=Tell me about Patient Monitoring Devices
+[2026-06-19 00:11:39] SOURCE=faiss | CONFIDENCE=1.00 | PRODUCT=PageWriter TC50 | CATEGORY=Cardiology | QUESTION=What is PageWriter TC50?
+[2026-06-19 00:12:10] SOURCE=faiss | CONFIDENCE=1.00 | PRODUCT=HeartStart FRx AED | CATEGORY=Cardiology | QUESTION=What are the features of HeartStart FRx AED?
+[2026-06-19 00:13:00] SOURCE=faiss | CONFIDENCE=0.95 | PRODUCT=PageWriter TC35 | CATEGORY=PatientMonitoring | QUESTION=Tell me about ECG
+[2026-06-19 00:14:10] SOURCE=dynamic_search | CONFIDENCE=0.84 | PRODUCT=N/A | CATEGORY=Unknown | QUESTION=What are the specifications of IntelliVue MX550?
+[2026-06-19 01:04:11] SOURCE=dynamic_search | CONFIDENCE=0.75 | PRODUCT=N/A | CATEGORY=PatientMonitoring | QUESTION=Tell me about Patient Monitoring Devices
+[2026-06-19 01:04:53] SOURCE=dynamic_search | CONFIDENCE=0.82 | PRODUCT=N/A | CATEGORY=Cardiology | QUESTION=Tell me about ECG
+[2026-06-19 01:06:11] SOURCE=faiss | CONFIDENCE=1.00 | PRODUCT=HeartStart FRx AED | CATEGORY=Cardiology | QUESTION=What are the features of HeartStart FRx AED?
+[2026-06-19 01:07:01] SOURCE=faiss | CONFIDENCE=1.00 | PRODUCT=PageWriter TC50 | CATEGORY=Cardiology | QUESTION=What are the specifications of PageWriter TC50?
+[2026-06-19 13:53:37] SOURCE=faiss | CONFIDENCE=1.00 | PRODUCT=PageWriter TC50 | CATEGORY=Cardiology | QUESTION=What is PageWriter TC50?
+[2026-06-19 13:54:10] SOURCE=faiss | CONFIDENCE=1.00 | PRODUCT=HeartStart FRx AED | CATEGORY=Cardiology | QUESTION=Tell me about HeartStart FRx AED.
+[2026-06-19 13:55:10] SOURCE=faiss | CONFIDENCE=1.00 | PRODUCT=PageWriter TC50 | CATEGORY=Cardiology | QUESTION=Compare PageWriter TC50 and TC70.
+[2026-06-19 13:56:11] SOURCE=faiss | CONFIDENCE=0.97 | PRODUCT=E-Flo 6C Anaesthesia Workstation | CATEGORY=Anaesthesia | QUESTION=What is an Anaesthesia Workstation?
+[2026-06-23 19:53:33] SOURCE=faiss | CONFIDENCE=0.97 | PRODUCT=PageWriter TC10 | CATEGORY=PatientMonitoring | QUESTION=Tell me about page writer tc50
+[2026-06-23 19:55:41] SOURCE=dynamic_search | CONFIDENCE=0.72 | PRODUCT=N/A | CATEGORY=Cardiology | QUESTION=What is a Holter Monitor?
+[2026-06-23 22:03:10] SOURCE=fallback | CONFIDENCE=0.00 | PRODUCT=N/A | CATEGORY=N/A | QUESTION=What is PageWriter TC50?
+[2026-06-23 22:03:38] SOURCE=fallback | CONFIDENCE=0.00 | PRODUCT=N/A | CATEGORY=N/A | QUESTION=What is PageWriter TC50?
+[2026-06-23 22:04:01] SOURCE=faiss | CONFIDENCE=1.00 | PRODUCT=HeartStart FRx AED | CATEGORY=Cardiology | QUESTION=What are the features of HeartStart FRx AED?
+[2026-06-23 22:26:28] SOURCE=fallback | CONFIDENCE=0.00 | PRODUCT=N/A | CATEGORY=N/A | QUESTION=What is PageWriter TC50?
+[2026-06-23 22:27:03] SOURCE=fallback | CONFIDENCE=0.00 | PRODUCT=N/A | CATEGORY=N/A | QUESTION=Tell me about PageWriter TC50
+[2026-06-23 22:27:48] SOURCE=faiss | CONFIDENCE=1.00 | PRODUCT=HeartStart FRx AED | CATEGORY=Cardiology | QUESTION=What are the features of HeartStart FRx AED?
+[2026-06-23 22:28:46] SOURCE=dynamic_search | CONFIDENCE=0.83 | PRODUCT=N/A | CATEGORY=Cardiology | QUESTION=What is a Holter Monitor?
+[2026-06-23 23:15:39] SOURCE=faiss | CONFIDENCE=1.00 | PRODUCT=PageWriter TC50 | CATEGORY=Cardiology | QUESTION=What is PageWriter TC50?
+[2026-06-23 23:20:23] SOURCE=dynamic_search | CONFIDENCE=0.84 | PRODUCT=N/A | CATEGORY=MotherChildCare | QUESTION=What is Bubble CPAP System?
+[2026-06-24 13:50:59] SOURCE=dynamic_search | CONFIDENCE=0.72 | PRODUCT=N/A | CATEGORY=MotherChildCare | QUESTION=What is Bubble CPAP System?
+[2026-06-24 14:00:43] SOURCE=faiss | CONFIDENCE=1.00 | PRODUCT=PageWriter TC50 | CATEGORY=Cardiology | QUESTION=What is PageWriter TC50?
+[2026-06-26 14:59:00] SOURCE=dynamic_search | CONFIDENCE=0.79 | PRODUCT=N/A | CATEGORY=Cardiology | QUESTION=Tell me about ECG
+[2026-06-26 15:00:00] SOURCE=dynamic_search | CONFIDENCE=0.85 | PRODUCT=N/A | CATEGORY=PatientMonitoring | QUESTION=Tell me about Syringe Pump
+[2026-06-26 15:01:36] SOURCE=dynamic_search | CONFIDENCE=0.77 | PRODUCT=N/A | CATEGORY=PatientMonitoring | QUESTION=What is Defibrillators?
+[2026-06-26 15:03:34] SOURCE=dynamic_search | CONFIDENCE=0.78 | PRODUCT=N/A | CATEGORY=OTComplex | QUESTION=What are Surgery Lights?

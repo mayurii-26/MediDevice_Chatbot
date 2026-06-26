@@ -1,0 +1,112 @@
+device urls
+
+1) Patient Monitoring Devices
+A. ECG
+1. Cardiac Workstation 7000
+	https://www.philips.co.in/healthcare/product/860441/cardiac-workstation-7000-860441-cardiac-workstation
+2. PageWriter TC50
+	https://www.philips.co.in/healthcare/product/HC860310/pagewriter-tc50-cardiograph
+3. ST80i Stress Testing System
+	https://www.philips.co.in/healthcare/product/HC860343/philips-st80i-stress-testing-system
+4. PageWriter TC10 Cardiograph
+	http://philips.co.in/healthcare/product/HC860392/pagewriter-tc10-cardiograph-easy-to-use-and-affordable
+5. PageWriter TC35 Cardiograph
+	https://www.philips.co.in/healthcare/product/860437/pagewriter-tc35-cardiograph
+
+B. Defibrillators
+1. Philips HeartStart HS1
+	https://www.heartstream.com/en-in/product/heartstart-hs1/
+2. Philips HeartStart FRx AED
+	https://www.heartstream.com/en-in/product/heartstart-frx/
+3. Efficia DFM100 monitor/defibrillator
+	https://www.heartstream.com/en-in/product/dfm100/
+
+C. Syringe Pump
+1. ASP11-1A Digital Lab Syringe Pump
+	https://www.longerpump.com/list_115/1566.html
+2. dLSP 520 Pro Digital Lab Syringe Pump
+	https://www.longerpump.com/list_67/1483.html
+
+D. Infusion Pumps
+	https://en.wikipedia.org/wiki/Infusion_pump
+
+E. Ventilators
+1. Trilogy EV300 Hospital ventilator
+	http://philips.co.in/healthcare/product/HCIN2200X15B/trilogy-ev300-hospital-ventilator
+
+F. Air Bed
+
+G.Fluid Warmers
+	https://www.sciencedirect.com/topics/medicine-and-dentistry/fluid-warmer
+
+2) Cardiology
+A. ECG
+1. Cardiac Workstation 7000
+	https://www.philips.co.in/healthcare/product/860441/cardiac-workstation-7000-860441-cardiac-workstation
+2. PageWriter TC50
+	https://www.philips.co.in/healthcare/product/HC860310/pagewriter-tc50-cardiograph
+3. PageWriter TC10 Cardiograph
+	http://philips.co.in/healthcare/product/HC860392/pagewriter-tc10-cardiograph-easy-to-use-and-affordable
+4. PageWriter TC35 Cardiograph
+	https://www.philips.co.in/healthcare/product/860437/pagewriter-tc35-cardiograph
+
+
+B. Stress Test
+1. ST80i Stress Testing System
+	https://www.philips.co.in/healthcare/product/HC860343/philips-st80i-stress-testing-system
+
+C. Defibrillators
+1. Philips HeartStart HS1
+	https://www.heartstream.com/en-in/product/heartstart-hs1/
+2. Philips HeartStart FRx AED
+	https://www.heartstream.com/en-in/product/heartstart-frx/
+3. Efficia DFM100 monitor/defibrillator
+	https://www.heartstream.com/en-in/product/dfm100/
+
+
+D.Ambulatory Blood Pressure Recorder (ABPM)
+1.	https://my.clevelandclinic.org/health/diagnostics/16330-24-hour-ambulatory-blood-pressure-monitoring
+
+2. Oscar 2 Ambulatory Blood Pressure Monitor
+	https://www.suntechmed.com/bp-products/ambulatory-blood-pressure-monitoring/oscar-2-ambulatory-blood-pressure-monitor
+
+E. Holter Moniter
+	https://www.mayoclinic.org/tests-procedures/holter-monitor/about/pac-20385039
+
+3) Anaesthesia
+A. Laryngoscopes
+	https://www.sciencedirect.com/topics/nursing-and-health-professions/laryngoscope
+
+B. Resuscitator
+1. Ambu® SPUR® II Disposable Resuscitator
+	https://www.ambuasia.com/emergency-care-and-training/resuscitators/product/ambu-spur-ii
+2. Mark IV - Reusable Resuscitator
+	https://www.ambuasia.com/emergency-care-and-training/resuscitators/product/ambu-mark-iv
+
+D. Video Laryngoscope
+	https://pmc.ncbi.nlm.nih.gov/articles/PMC3227301/
+
+E. Anaesthesia Workstation
+1. E - Flo 6
+	https://www.bplmedicaltechnologies.com/product-details/anesthesia-workstation/e-flo-series/e-flo-6/
+2. E - Flo 6C
+	http://bplmedicaltechnologies.com/product-details/anesthesia-workstation/e-flo-series/e-flo-6c/
+
+4) OT Complex
+A. Surgery Lights
+	https://hospediamedicare.com/classic-led-50/	
+B. OT Tables
+	https://hospediamedicare.com/surgical-table/
+
+5) Mother and Child Care
+A. Pulse Oximeters
+	https://pmc.ncbi.nlm.nih.gov/articles/PMC11438930/
+B. Radiant Warmer
+	https://www.niceneotech.com/blog/2021/10/26/infant-radiant-warmer-opera/1000/
+C. Phototherapy
+	https://my.clevelandclinic.org/health/treatments/24385-phototherapy-light-therapy
+D. Bubble CPAP System
+	https://www.ncbi.nlm.nih.gov/books/NBK613282/
+E. Neonatal Ventilator
+	https://int-bio.com/understanding-role-ventilators-neonatal-care/
+	https://www.draeger.com/en_neeur/Productfinder/Ventilators/Neonatal-Ventilators#information

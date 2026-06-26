@@ -1,0 +1,278 @@
+{
+  "PatientMonitoring": [
+    {
+      "device_name": "Cardiac Workstation 7000",
+      "device_type": "ECG Workstation",
+      "manufacturer": "Philips",
+      "url": "https://www.philips.co.in/healthcare/product/860441/cardiac-workstation-7000-860441-cardiac-workstation",
+      "category": "PatientMonitoring"
+    },
+    {
+      "device_name": "PageWriter TC50",
+      "device_type": "Cardiograph",
+      "manufacturer": "Philips",
+      "url": "https://www.philips.co.in/healthcare/product/HC860310/pagewriter-tc50-cardiograph",
+      "category": "PatientMonitoring"
+    },
+    {
+      "device_name": "ST80i Stress Testing System",
+      "device_type": "Stress Testing System",
+      "manufacturer": "Philips",
+      "url": "https://www.philips.co.in/healthcare/product/HC860343/philips-st80i-stress-testing-system",
+      "category": "PatientMonitoring"
+    },
+    {
+      "device_name": "PageWriter TC10 Cardiograph",
+      "device_type": "Cardiograph",
+      "manufacturer": "Philips",
+      "url": "https://www.philips.co.in/healthcare/product/HC860392/pagewriter-tc10-cardiograph-easy-to-use-and-affordable",
+      "category": "PatientMonitoring"
+    },
+    {
+      "device_name": "PageWriter TC35 Cardiograph",
+      "device_type": "Cardiograph",
+      "manufacturer": "Philips",
+      "url": "https://www.philips.co.in/healthcare/product/860437/pagewriter-tc35-cardiograph",
+      "category": "PatientMonitoring"
+    },
+    {
+      "device_name": "HeartStart HS1",
+      "device_type": "AED Defibrillator",
+      "manufacturer": "Philips",
+      "url": "https://www.heartstream.com/en-in/product/heartstart-hs1/",
+      "category": "PatientMonitoring"
+    },
+    {
+      "device_name": "HeartStart FRx AED",
+      "device_type": "AED Defibrillator",
+      "manufacturer": "Philips",
+      "url": "https://www.heartstream.com/en-in/product/heartstart-frx/",
+      "category": "PatientMonitoring"
+    },
+    {
+      "device_name": "Efficia DFM100",
+      "device_type": "Monitor/Defibrillator",
+      "manufacturer": "Philips",
+      "url": "https://www.heartstream.com/en-in/product/dfm100/",
+      "category": "PatientMonitoring"
+    },
+    {
+      "device_name": "ASP11-1A Digital Lab Syringe Pump",
+      "device_type": "Syringe Pump",
+      "manufacturer": "Longer Pump",
+      "url": "https://www.longerpump.com/list_115/1566.html",
+      "category": "PatientMonitoring"
+    },
+    {
+      "device_name": "dLSP 520 Pro Digital Lab Syringe Pump",
+      "device_type": "Syringe Pump",
+      "manufacturer": "Longer Pump",
+      "url": "https://www.longerpump.com/list_67/1483.html",
+      "category": "PatientMonitoring"
+    },
+    {
+      "device_name": "Trilogy EV300 Hospital Ventilator",
+      "device_type": "Ventilator",
+      "manufacturer": "Philips",
+      "url": "https://www.philips.co.in/healthcare/product/HCIN2200X15B/trilogy-ev300-hospital-ventilator",
+      "category": "PatientMonitoring"
+    },
+    {
+      "device_name": "Infusion Pump",
+      "device_type": "Infusion Pump",
+      "manufacturer": "Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Infusion_pump",
+      "category": "PatientMonitoring"
+    },
+    {
+      "device_name": "Fluid Warmer",
+      "device_type": "Fluid Warmer",
+      "manufacturer": "ScienceDirect",
+      "url": "https://www.sciencedirect.com/topics/medicine-and-dentistry/fluid-warmer",
+      "category": "PatientMonitoring"
+    }
+  ],
+  "Cardiology": [
+    {
+      "device_name": "Cardiac Workstation 7000",
+      "device_type": "ECG Workstation",
+      "manufacturer": "Philips",
+      "url": "https://www.philips.co.in/healthcare/product/860441/cardiac-workstation-7000-860441-cardiac-workstation",
+      "category": "Cardiology"
+    },
+    {
+      "device_name": "PageWriter TC50",
+      "device_type": "Cardiograph",
+      "manufacturer": "Philips",
+      "url": "https://www.philips.co.in/healthcare/product/HC860310/pagewriter-tc50-cardiograph",
+      "category": "Cardiology"
+    },
+    {
+      "device_name": "PageWriter TC10 Cardiograph",
+      "device_type": "Cardiograph",
+      "manufacturer": "Philips",
+      "url": "https://www.philips.co.in/healthcare/product/HC860392/pagewriter-tc10-cardiograph-easy-to-use-and-affordable",
+      "category": "Cardiology"
+    },
+    {
+      "device_name": "PageWriter TC35 Cardiograph",
+      "device_type": "Cardiograph",
+      "manufacturer": "Philips",
+      "url": "https://www.philips.co.in/healthcare/product/860437/pagewriter-tc35-cardiograph",
+      "category": "Cardiology"
+    },
+    {
+      "device_name": "ST80i Stress Testing System",
+      "device_type": "Stress Testing System",
+      "manufacturer": "Philips",
+      "url": "https://www.philips.co.in/healthcare/product/HC860343/philips-st80i-stress-testing-system",
+      "category": "Cardiology"
+    },
+    {
+      "device_name": "HeartStart HS1",
+      "device_type": "AED Defibrillator",
+      "manufacturer": "Philips",
+      "url": "https://www.heartstream.com/en-in/product/heartstart-hs1/",
+      "category": "Cardiology"
+    },
+    {
+      "device_name": "HeartStart FRx AED",
+      "device_type": "AED Defibrillator",
+      "manufacturer": "Philips",
+      "url": "https://www.heartstream.com/en-in/product/heartstart-frx/",
+      "category": "Cardiology"
+    },
+    {
+      "device_name": "Efficia DFM100",
+      "device_type": "Monitor/Defibrillator",
+      "manufacturer": "Philips",
+      "url": "https://www.heartstream.com/en-in/product/dfm100/",
+      "category": "Cardiology"
+    },
+    {
+      "device_name": "Oscar 2 Ambulatory Blood Pressure Monitor",
+      "device_type": "Ambulatory Blood Pressure Monitor",
+      "manufacturer": "SunTech",
+      "url": "https://www.suntechmed.com/bp-products/ambulatory-blood-pressure-monitoring/oscar-2-ambulatory-blood-pressure-monitor",
+      "category": "Cardiology"
+    },
+    {
+      "device_name": "24-Hour Ambulatory Blood Pressure Monitoring",
+      "device_type": "Ambulatory Blood Pressure Monitor",
+      "manufacturer": "Cleveland Clinic",
+      "url": "https://my.clevelandclinic.org/health/diagnostics/16330-24-hour-ambulatory-blood-pressure-monitoring",
+      "category": "Cardiology"
+    },
+    {
+      "device_name": "Holter Monitor",
+      "device_type": "Holter Monitor",
+      "manufacturer": "Mayo Clinic",
+      "url": "https://www.mayoclinic.org/tests-procedures/holter-monitor/about/pac-20385039",
+      "category": "Cardiology"
+    }
+  ],
+  "Anaesthesia": [
+    {
+      "device_name": "Ambu SPUR II Disposable Resuscitator",
+      "device_type": "Disposable Resuscitator",
+      "manufacturer": "Ambu",
+      "url": "https://www.ambuasia.com/emergency-care-and-training/resuscitators/product/ambu-spur-ii",
+      "category": "Anaesthesia"
+    },
+    {
+      "device_name": "Ambu Mark IV Reusable Resuscitator",
+      "device_type": "Reusable Resuscitator",
+      "manufacturer": "Ambu",
+      "url": "https://www.ambuasia.com/emergency-care-and-training/resuscitators/product/ambu-mark-iv",
+      "category": "Anaesthesia"
+    },
+    {
+      "device_name": "E-Flo 6 Anaesthesia Workstation",
+      "device_type": "Anaesthesia Workstation",
+      "manufacturer": "BPL Medical",
+      "url": "https://www.bplmedicaltechnologies.com/product-details/anesthesia-workstation/e-flo-series/e-flo-6/",
+      "category": "Anaesthesia"
+    },
+    {
+      "device_name": "E-Flo 6C Anaesthesia Workstation",
+      "device_type": "Anaesthesia Workstation",
+      "manufacturer": "BPL Medical",
+      "url": "https://www.bplmedicaltechnologies.com/product-details/anesthesia-workstation/e-flo-series/e-flo-6c/",
+      "category": "Anaesthesia"
+    },
+    {
+      "device_name": "Laryngoscope",
+      "device_type": "Laryngoscope",
+      "manufacturer": "ScienceDirect",
+      "url": "https://www.sciencedirect.com/topics/nursing-and-health-professions/laryngoscope",
+      "category": "Anaesthesia"
+    },
+    {
+      "device_name": "Video Laryngoscope",
+      "device_type": "Video Laryngoscope",
+      "manufacturer": "PubMed",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3227301/",
+      "category": "Anaesthesia"
+    }
+  ],
+  "OTComplex": [
+    {
+      "device_name": "Classic LED 50 Surgery Light",
+      "device_type": "Surgical Light",
+      "manufacturer": "Hospedia Medicare",
+      "url": "https://hospediamedicare.com/classic-led-50/",
+      "category": "OTComplex"
+    },
+    {
+      "device_name": "Surgical Table",
+      "device_type": "OT Table",
+      "manufacturer": "Hospedia Medicare",
+      "url": "https://hospediamedicare.com/surgical-table/",
+      "category": "OTComplex"
+    }
+  ],
+  "MotherChildCare": [
+    {
+      "device_name": "Pulse Oximeter",
+      "device_type": "Pulse Oximeter",
+      "manufacturer": "PubMed",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11438930/",
+      "category": "MotherChildCare"
+    },
+    {
+      "device_name": "Infant Radiant Warmer Opera",
+      "device_type": "Radiant Warmer",
+      "manufacturer": "Niceneo Tech",
+      "url": "https://www.niceneotech.com/blog/2021/10/26/infant-radiant-warmer-opera/1000/",
+      "category": "MotherChildCare"
+    },
+    {
+      "device_name": "Phototherapy",
+      "device_type": "Phototherapy System",
+      "manufacturer": "Cleveland Clinic",
+      "url": "https://my.clevelandclinic.org/health/treatments/24385-phototherapy-light-therapy",
+      "category": "MotherChildCare"
+    },
+    {
+      "device_name": "Bubble CPAP System",
+      "device_type": "Bubble CPAP System",
+      "manufacturer": "NIH",
+      "url": "https://www.ncbi.nlm.nih.gov/books/NBK613282/",
+      "category": "MotherChildCare"
+    },
+    {
+      "device_name": "Neonatal Ventilator",
+      "device_type": "Neonatal Ventilator",
+      "manufacturer": "Int-Bio",
+      "url": "https://int-bio.com/understanding-role-ventilators-neonatal-care/",
+      "category": "MotherChildCare"
+    },
+    {
+      "device_name": "Neonatal Ventilator",
+      "device_type": "Neonatal Ventilator",
+      "manufacturer": "Draeger",
+      "url": "https://www.draeger.com/en_neeur/Productfinder/Ventilators/Neonatal-Ventilators#information",
+      "category": "MotherChildCare"
+    }
+  ]
+}

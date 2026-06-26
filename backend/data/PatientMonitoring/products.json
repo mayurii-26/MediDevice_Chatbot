@@ -1,0 +1,83 @@
+[
+  {
+    "product_name": "Cardiac Workstation 7000",
+    "device_type": "ECG Workstation",
+    "category": "PatientMonitoring",
+    "description": "Philips Cardiac Workstation is a clinical breakthrough designed to improve the way you capture, access, view, analyze, store, share and manage ECGs - to transform diagnostic cardiography. This ergonomic leap forward streamlines workflow and delivers rich clinical information from systems across your enterprise and beyond to the point of decision. So you can diagnose and treat cardiac patients with confidence.",
+    "url": "https://www.philips.co.in/healthcare/product/860441/cardiac-workstation-7000-860441-cardiac-workstation",
+    "manufacturer": "Philips",
+    "source_type": "manufacturer"
+  },
+  {
+    "product_name": "PageWriter TC50",
+    "device_type": "Cardiograph",
+    "category": "PatientMonitoring",
+    "description": "High performance in a compact device. The Philips PageWriter TC50 cardiograph is an advanced, reliable, and compact ECG solution that is easy to use.",
+    "url": "https://www.philips.co.in/healthcare/product/HC860310/pagewriter-tc50-cardiograph",
+    "manufacturer": "Philips",
+    "source_type": "manufacturer"
+  },
+  {
+    "product_name": "ST80i Stress Testing System",
+    "device_type": "Stress Testing System",
+    "category": "PatientMonitoring",
+    "description": "Workflow that works for you. The Philips ST80i is a comprehensive stress testing system designed to streamline cardiac stress test workflows.",
+    "url": "https://www.philips.co.in/healthcare/product/HC860343/philips-st80i-stress-testing-system",
+    "manufacturer": "Philips",
+    "source_type": "manufacturer"
+  },
+  {
+    "product_name": "PageWriter TC10",
+    "device_type": "Cardiograph",
+    "category": "PatientMonitoring",
+    "description": "The Philips PageWriter TC10 is an advanced cardiograph that can grow with you as your workflow evolves. With its compact size and lightweight design, the TC10 is a portable solution that supports patient needs in a wide range of care settings.",
+    "url": "https://www.philips.co.in/healthcare/product/HC860392/pagewriter-tc10-cardiograph-easy-to-use-and-affordable",
+    "manufacturer": "Philips",
+    "source_type": "manufacturer"
+  },
+  {
+    "product_name": "PageWriter TC35",
+    "device_type": "Cardiograph",
+    "category": "PatientMonitoring",
+    "description": "Advanced, yet easy to use, the PageWriter TC35 ECG offers speed in an attractive, economic solution for cardiac care.",
+    "url": "https://www.philips.co.in/healthcare/product/860437/pagewriter-tc35-cardiograph",
+    "manufacturer": "Philips",
+    "source_type": "manufacturer"
+  },
+  {
+    "product_name": "HeartStart HS1",
+    "device_type": "AED Defibrillator",
+    "category": "PatientMonitoring",
+    "description": "HeartStart HS1 is ready to act and virtually ready to go. It allows anyone with little or no training to treat sudden cardiac arrest (SCA) by delivering a shock quickly and effectively, wherever SCA happens.",
+    "url": "https://www.heartstream.com/en-in/product/heartstart-hs1/",
+    "manufacturer": "Philips",
+    "source_type": "manufacturer"
+  },
+  {
+    "product_name": "HeartStart FRx AED",
+    "device_type": "AED Defibrillator",
+    "category": "PatientMonitoring",
+    "description": "The Philips HeartStart FRx defibrillator is rugged, lightweight and reliable. It can withstand rough handling and extreme temperatures, making it a dependable partner for basic life support responders.",
+    "url": "https://www.heartstream.com/en-in/product/heartstart-frx/",
+    "manufacturer": "Philips",
+    "source_type": "manufacturer"
+  },
+  {
+    "product_name": "Efficia DFM100",
+    "device_type": "Monitor/Defibrillator",
+    "category": "PatientMonitoring",
+    "description": "Support critical care delivery in any setting with the Efficia DFM100 - compact, reliable, and easy to use for hospital and EMS professionals.",
+    "url": "https://www.heartstream.com/en-in/product/dfm100/",
+    "manufacturer": "Philips",
+    "source_type": "manufacturer"
+  },
+  {
+    "product_name": "Trilogy EV300 Hospital Ventilator",
+    "device_type": "Ventilator",
+    "category": "PatientMonitoring",
+    "description": "Smooth patient transitions from admissions to discharge. The Philips Trilogy EV300 is a hospital ventilator designed to support patients across multiple care settings.",
+    "url": "https://www.philips.co.in/healthcare/product/HCIN2200X15B/trilogy-ev300-hospital-ventilator",
+    "manufacturer": "Philips",
+    "source_type": "manufacturer"
+  }
+]

@@ -75,3 +75,31 @@ def get_documents_by_product(product_name: str) -> list[dict]:
 
     print(f"[documents] product={product_name} | found={len(docs)}")
     return docs
+
+
+def get_documents_by_names(document_names: list[str]) -> list[dict]:
+    """
+    Return document rows whose document_name is in the given list.
+    Used to guarantee source documents are returned whenever pdf_chunks are used.
+    """
+    if not document_names:
+        return []
+    result = (
+        supabase.table(TABLE)
+        .select("id, product_name, document_name, document_type, file_url, storage_path")
+        .in_("document_name", document_names)
+        .eq("is_active", True)
+        .order("document_name")
+        .execute()
+    )
+    docs = result.data or []
+    # Deduplicate by document_name
+    seen: set[str] = set()
+    unique: list[dict] = []
+    for doc in docs:
+        key = doc.get("document_name", "")
+        if key not in seen:
+            seen.add(key)
+            unique.append(doc)
+    print(f"[documents] pdf_source lookup | requested={len(document_names)} | found={len(unique)}")
+    return unique

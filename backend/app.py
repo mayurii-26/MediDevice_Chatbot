@@ -7,7 +7,7 @@ from gemini_service import generate_answer
 from email_service import send_email
 from logger import log_search
 from intent_detector import detect_intent
-from document_service import get_categories, get_subcategories, get_documents, get_documents_by_product
+from document_service import get_categories, get_subcategories, get_documents, get_documents_by_product, get_documents_by_names
 
 from cache_service import (
     get_cached_answer,
@@ -138,11 +138,64 @@ def chat(req: ChatRequest, authorization: str | None = Header(default=None)):
         print(
             f"[debug] intent={intent} | matched_product={result.matched_product or 'None'}"
             f" | source={result.source} | chunks={len(result.chunks)}"
+            f" | pdf_chunks={len(result.pdf_chunks)}"
         )
+
+        # Build structured context with clearly separated sections.
+        combined_context = []
+
+        if result.chunks:
+            from search.common import deduplicate_by_product, extract_product_name, extract_category
+            import re as _re
+
+            def _format_product_chunk(chunk: str) -> str:
+                name = extract_product_name(chunk) or "Unknown Product"
+                category = extract_category(chunk) or "Unknown"
+                # Extract description — everything after "Description:" line
+                desc_m = _re.search(r"Description:\s*(.+)", chunk, _re.DOTALL)
+                description = desc_m.group(1).strip() if desc_m else ""
+                # Strip any remaining "Key: value" lines that aren't description
+                description = _re.sub(r"\n[A-Za-z ]+:\s*.+", "", description).strip()
+                parts = [f"📦 Product\n\n{name}\n\nCategory\n{category}"]
+                if description:
+                    parts.append(f"Summary\n\n{description}")
+                return "\n\n".join(parts)
+
+            from intent_detector import COMPARISON_QUERY
+            chunks_to_use = result.chunks
+            if result.matched_product and intent != COMPARISON_QUERY:
+                chunks_to_use = [
+                    c for c in result.chunks
+                    if (extract_product_name(c) or "").lower() == result.matched_product.lower()
+                ] or result.chunks  # fall back to all if filter empties the list
+
+            unique_chunks = deduplicate_by_product(chunks_to_use)
+            formatted = [_format_product_chunk(c) for c in unique_chunks]
+            section = "\n\n---\n\n".join(formatted)
+            combined_context.append(section)
+
+        if result.pdf_chunks:
+            from gemini_service import _extract_bullets
+            sections = ["📄 PDF Knowledge"]
+            for pc in result.pdf_chunks:
+                bullets = _extract_bullets(pc["chunk_text"], max_bullets=8, min_bullets=3)
+                highlights = "\n".join(f"- {b}" for b in bullets) if bullets else pc["chunk_text"][:300]
+                sections.append(
+                    f"Source\n\n{pc['document_name']}\nPage {pc['page_number']}\n\n"
+                    f"Highlights\n\n{highlights}"
+                )
+            combined_context.append("\n\n".join(sections))
+
+        # Dynamic search results are already in result.chunks when source=="dynamic_search";
+        # label them explicitly so Gemini sees the section header.
+        if result.source == "dynamic_search" and result.chunks:
+            combined_context = [
+                "🌐 Dynamic Search\n\n" + "\n\n".join(result.chunks)
+            ]
 
         answer = generate_answer(
             req.question,
-            result.chunks,
+            combined_context,
             result.source,
             intent,
         )
@@ -178,6 +231,18 @@ def chat(req: ChatRequest, authorization: str | None = Header(default=None)):
                 print(f"[debug] documents_found={len(documents)}")
             except Exception as doc_err:
                 print(f"[documents] lookup failed (non-fatal): {type(doc_err).__name__}: {doc_err}")
+
+        # If pdf_chunks were used, always attach their source documents.
+        if result.pdf_chunks:
+            try:
+                pdf_doc_names = list({pc["document_name"] for pc in result.pdf_chunks})
+                pdf_docs = get_documents_by_names(pdf_doc_names)
+                # Merge — avoid duplicates by document_name
+                existing_names = {d["document_name"] for d in documents}
+                documents += [d for d in pdf_docs if d["document_name"] not in existing_names]
+                print(f"[debug] pdf_source_docs_added={len(pdf_docs)}")
+            except Exception as pdf_doc_err:
+                print(f"[documents] pdf source lookup failed (non-fatal): {type(pdf_doc_err).__name__}: {pdf_doc_err}")
 
         print(
             f"\n[debug] intent={intent}"

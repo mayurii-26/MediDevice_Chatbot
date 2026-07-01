@@ -135,10 +135,11 @@ body {
 .chat-layout {
   display: grid;
   grid-template-columns: 260px minmax(0, 1fr);
-  gap: 22px;
-  max-width: 1200px;
+  gap: 20px;
+  max-width: 1800px;
+  width: 95%;
   margin: 0 auto;
-  padding: 0 18px;
+  padding: 0 12px;
 }
 
 .history-sidebar {
@@ -223,9 +224,9 @@ body {
 
 /* ── App Layout ───────────────────────────────── */
 .app {
-  max-width: 900px;
-  margin: 30px auto;
-  padding: 0 20px 60px;
+  width: 100%;
+  margin: 30px 0;
+  padding: 0 4px 60px;
 }
 
 /* ── Header ───────────────────────────────────── */
@@ -332,7 +333,7 @@ textarea:focus {
 
 /* ── Chat Box Scroll Area ─────────────────────── */
 .chat-box {
-  max-height: 480px;
+  max-height: 620px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -360,7 +361,7 @@ textarea:focus {
 .bot-msg {
   padding: 12px 16px;
   border-radius: 12px;
-  max-width: 85%;
+  max-width: 92%;
   font-size: 0.93rem;
   line-height: 1.6;
 }
@@ -660,6 +661,13 @@ select:focus {
 }
 
 /* ── Responsive ───────────────────────────────── */
+@media (max-width: 1100px) {
+  .chat-layout {
+    width: 98%;
+    gap: 14px;
+  }
+}
+
 @media (max-width: 600px) {
   .chat-layout {
     display: block;
@@ -675,7 +683,7 @@ select:focus {
 
   .app {
     padding: 0 12px 40px;
-    margin: 12px auto;
+    margin: 12px 0;
   }
 
   .header h1 {

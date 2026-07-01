@@ -7,3 +7,4 @@ faiss-cpu==1.14.2
 numpy==2.2.6
 google-genai==2.8.0
 ddgs>=9.14.4
+pypdf==4.3.1

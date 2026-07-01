@@ -46,18 +46,34 @@ _CATEGORY_PATTERNS = [
 ]
 
 _GENERAL_MEDICAL_TERMS = {
-    "ecg", "electrocardiogram", "electrocardiography",
-    "aed", "automated external defibrillator",
-    "defibrillator", "defibrillation",
-    "holter", "holter monitor",
-    "abpm", "ambulatory blood pressure",
-    "cpap", "ventilator", "ventilation",
-    "pulse oximeter", "oximetry", "spo2",
-    "infusion pump", "syringe pump",
-    "stress test", "stress testing",
+    # Pure medical concepts — no Philips catalog entry, route to web search
     "cardiac arrest", "arrhythmia",
-    "phototherapy", "jaundice treatment",
-    "laryngoscope", "intubation",
+    "jaundice treatment", "phototherapy",
+    "intubation", "defibrillation",
+    "electrocardiography", "oximetry",
+    "ambulatory blood pressure", "stress testing",
+    "ventilation",
+}
+
+# Medical device names that exist in (or are closely related to) our catalog.
+# Queries containing these should route to product_query so FAISS can match them.
+_DEVICE_NAME_TERMS = {
+    "ecg", "electrocardiogram",
+    "aed", "automated external defibrillator",
+    "defibrillator",
+    "holter", "holter monitor",
+    "abpm",
+    "cpap",
+    "ventilator",
+    "pulse oximeter", "spo2",
+    "infusion pump", "syringe pump",
+    "laryngoscope", "video laryngoscope",
+    "patient monitor", "bedside monitor",
+    "ctg", "cardiotocograph",
+    "stress test",
+    "phototherapy lamp", "radiant warmer",
+    "anaesthesia machine", "anaesthesia workstation",
+    "anesthesia machine",
 }
 
 # Known product name fragments — presence means product_query, not general
@@ -107,6 +123,11 @@ def detect_intent(query: str) -> str:
         for term in _GENERAL_MEDICAL_TERMS:
             if term in q:
                 return GENERAL_MEDICAL
+
+        # Device names in our catalog → product_query so FAISS can match them
+        for term in _DEVICE_NAME_TERMS:
+            if term in q:
+                return PRODUCT_QUERY
 
     # 6. Default: treat as a product query
     return PRODUCT_QUERY

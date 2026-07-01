@@ -47,3 +47,19 @@
 [2026-06-26 15:00:00] SOURCE=dynamic_search | CONFIDENCE=0.85 | PRODUCT=N/A | CATEGORY=PatientMonitoring | QUESTION=Tell me about Syringe Pump
 [2026-06-26 15:01:36] SOURCE=dynamic_search | CONFIDENCE=0.77 | PRODUCT=N/A | CATEGORY=PatientMonitoring | QUESTION=What is Defibrillators?
 [2026-06-26 15:03:34] SOURCE=dynamic_search | CONFIDENCE=0.78 | PRODUCT=N/A | CATEGORY=OTComplex | QUESTION=What are Surgery Lights?
+[2026-06-26 21:18:22] SOURCE=dynamic_search | CONFIDENCE=0.82 | PRODUCT=N/A | CATEGORY=Cardiology | QUESTION=Tell me about ECG
+[2026-06-26 21:19:26] SOURCE=faiss | CONFIDENCE=0.97 | PRODUCT=Trilogy EV300 Hospital Ventilator | CATEGORY=PatientMonitoring | QUESTION=Compare ventilators and patient monitors.
+[2026-06-26 21:21:29] SOURCE=dynamic_search | CONFIDENCE=0.71 | PRODUCT=N/A | CATEGORY=Anaesthesia | QUESTION=What is a Video Laryngoscope?
+[2026-06-26 21:22:35] SOURCE=faiss | CONFIDENCE=0.95 | PRODUCT=Trilogy EV300 Hospital Ventilator | CATEGORY=PatientMonitoring | QUESTION=What are the features of Neonatal Ventilator?
+[2026-06-26 21:24:11] SOURCE=dynamic_search | CONFIDENCE=0.76 | PRODUCT=N/A | CATEGORY=Cardiology | QUESTION=Tell me about Ambulatory Blood Pressure (ABPM)
+[2026-06-26 22:19:26] SOURCE=faiss | CONFIDENCE=0.97 | PRODUCT=E-Flo 6C Anaesthesia Workstation | CATEGORY=Anaesthesia | QUESTION=What is an Anaesthesia Workstation?
+[2026-06-26 22:22:10] SOURCE=faiss | CONFIDENCE=1.00 | PRODUCT=PageWriter TC10 | CATEGORY=Cardiology | QUESTION=What is PageWriter TC10?
+[2026-06-26 22:25:42] SOURCE=faiss | CONFIDENCE=1.00 | PRODUCT=PageWriter TC50 | CATEGORY=Cardiology | QUESTION=What are the features of PageWriter TC50?
+[2026-06-26 22:27:10] SOURCE=faiss | CONFIDENCE=0.96 | PRODUCT=Trilogy EV300 Hospital Ventilator | CATEGORY=PatientMonitoring | QUESTION=What is Neonatal Ventilator?
+[2026-06-26 22:28:31] SOURCE=faiss | CONFIDENCE=0.97 | PRODUCT=E-Flo 6C Anaesthesia Workstation | CATEGORY=Anaesthesia | QUESTION=What is an Anaesthesia Workstation?
+[2026-06-26 23:46:32] SOURCE=faiss | CONFIDENCE=0.96 | PRODUCT=Trilogy EV300 Hospital Ventilator | CATEGORY=PatientMonitoring | QUESTION=What are the features of Trilogy EV300?
+[2026-06-26 23:47:48] SOURCE=faiss | CONFIDENCE=1.00 | PRODUCT=PageWriter TC10 | CATEGORY=Cardiology | QUESTION=What are the specifications of PageWriter TC10?
+[2026-06-27 00:04:41] SOURCE=faiss | CONFIDENCE=0.96 | PRODUCT=Oscar 2 Ambulatory Blood Pressure Monitor | CATEGORY=Cardiology | QUESTION=What is ABPM?
+[2026-06-27 00:06:49] SOURCE=faiss | CONFIDENCE=1.00 | PRODUCT=PageWriter TC35 | CATEGORY=Cardiology | QUESTION=PageWriter TC35
+[2026-06-27 00:08:40] SOURCE=dynamic_search | CONFIDENCE=0.85 | PRODUCT=N/A | CATEGORY=Cardiology | QUESTION=What is a Holter Monitor?
+[2026-06-27 00:09:46] SOURCE=faiss | CONFIDENCE=1.00 | PRODUCT=HeartStart FRx AED | CATEGORY=Cardiology | QUESTION=Tell me about HeartStart FRx AED

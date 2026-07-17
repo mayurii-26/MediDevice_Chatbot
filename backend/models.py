@@ -39,3 +39,58 @@ class ContactRequest(BaseModel):
 
 class ContactResponse(BaseModel):
     message: str
+
+
+# ── Download / OTP ──────────────────────────────────────────────────────────
+
+class DownloadRequestBody(BaseModel):
+    full_name:        str
+    email:            str
+    phone:            str
+    designation:      str
+    country:          str
+    document_id:      str
+    document_name:    str
+    file_url:         str
+    user_id:          Optional[str] = None
+    guest_session_id: Optional[str] = None
+
+
+class DownloadRequestResponse(BaseModel):
+    request_id: str
+    email:      str
+
+
+class VerifyOtpBody(BaseModel):
+    request_id: str
+    otp:        str
+
+
+class VerifyOtpResponse(BaseModel):
+    verified:  bool
+    serve_url: Optional[str] = None   # /download/serve/{token} — never the raw storage URL
+
+
+class ResendOtpBody(BaseModel):
+    request_id: str
+
+
+class ResendOtpResponse(BaseModel):
+    email: str
+
+
+# ── User preferences (lightweight, for future personalisation) ──────────────
+
+class UserPreferencesBody(BaseModel):
+    preferred_category: Optional[str] = None
+    recent_products:    Optional[list[str]] = None
+    favorite_products:  Optional[list[str]] = None
+
+
+class UserPreferencesResponse(BaseModel):
+    user_id:            str
+    preferred_category: Optional[str] = None
+    recent_products:    list[str] = []
+    favorite_products:  list[str] = []
+    last_active:        Optional[str] = None
+

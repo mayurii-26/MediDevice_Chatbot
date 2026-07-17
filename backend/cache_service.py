@@ -1,10 +1,18 @@
 """
 cache_service.py
+
 Improvements:
-  1. Semantic similarity matching via cosine similarity on embeddings.
-  2. Never cache fallback / error responses.
-  3. Ignore invalid (fallback) answers already in cache.
-  4. Cache quality gate: answer must be > 100 chars and contain real content.
+  1. ENABLE_CACHE flag — controlled by .env.  When False, all cache reads
+     and writes are skipped and the full pipeline always executes.
+  2. Full structured logging:
+       [CACHE] STATUS   : HIT | MISS | DISABLED
+       [CACHE] QUESTION : <normalised question>
+       [CACHE] KEY      : <cache key>
+       [CACHE] SOURCE   : cache | pipeline
+  3. Semantic similarity matching via cosine similarity on embeddings.
+  4. Never cache fallback / error responses.
+  5. Ignore invalid (fallback) answers already in cache.
+  6. Cache quality gate: answer must be > 100 chars and contain real content.
 
 Embedding column migration:
   Run this once in Supabase SQL editor:
@@ -12,22 +20,40 @@ Embedding column migration:
   Until the column exists the service degrades to exact-match only.
 """
 
+import os
 import numpy as np
+from dotenv import load_dotenv
 from database.supabase_client import supabase
+
+# ── Load environment ──────────────────────────────────────────────────────
+load_dotenv()
+
+# ── Single feature flag — flip this in .env to re-enable cache ───────────
+_raw_flag = os.getenv("ENABLE_CACHE", "true").strip().lower()
+ENABLE_CACHE: bool = _raw_flag in ("1", "true", "yes", "on")
 
 # ── Similarity threshold ──────────────────────────────────────────────────
 SIMILARITY_THRESHOLD = 0.90
 
 # ── Fallback fragments that must never be cached or returned ──────────────
 _FALLBACK_FRAGMENTS = [
-    "i am a medical device assistant trained on philips",
+    # Generic fallback responses
+    "i am a medical device assistant trained on",
     "our ai service is temporarily unavailable",
     "please ask about supported medical devices",
     "temporarily unavailable",
-    "contact support@medidevicechatbot.com for further assistance",
+    "contact support@medideviceai.com for further assistance",
     "i could not find relevant information",
+    # Purchase / pricing intent replies (Phase 5.2) — never cache these
+    "pricing and purchasing information is not available through the chatbot",
+    "please contact our support team and we'll get back to you shortly",
+    # Out-of-scope / out-of-context replies (Phase 5.3 / 5.6) — never cache
+    "this platform is designed only for medical devices",
+    "healthcare-related queries",
 ]
 
+
+# ── Helpers ───────────────────────────────────────────────────────────────
 
 def _normalise_question(question: str) -> str:
     return " ".join(question.strip().lower().split())
@@ -51,8 +77,25 @@ def _is_quality(answer: str) -> bool:
     )
 
 
+def _log_cache(status: str, question: str, intent: str, extra: str = "") -> None:
+    """
+    Emit a structured cache log line.
+
+    status  : HIT | MISS | DISABLED | STORED | SKIPPED
+    """
+    key = _cache_key(question, intent)
+    print(
+        f"\n╔══ [CACHE] ══════════════════════════════════════════"
+        f"\n║  STATUS   : {status}"
+        f"\n║  QUESTION : {_normalise_question(question)}"
+        f"\n║  KEY      : {key}"
+        f"\n║  SOURCE   : {'cache' if status == 'HIT' else 'pipeline'}"
+        + (f"\n║  NOTE     : {extra}" if extra else "")
+        + f"\n╚═════════════════════════════════════════════════════\n"
+    )
+
+
 # ── Known product tokens — used to prevent cross-product cache hits ────────
-# Any two questions containing different tokens from this list must NOT match.
 _PRODUCT_TOKENS = [
     "tc50", "tc35", "tc10",
     "frx", "hs1",
@@ -65,7 +108,6 @@ _PRODUCT_TOKENS = [
 
 
 def _extract_product_token(text: str) -> str | None:
-    """Return the first known product token found in text, or None."""
     t = text.lower()
     for token in _PRODUCT_TOKENS:
         if token in t:
@@ -74,15 +116,10 @@ def _extract_product_token(text: str) -> str | None:
 
 
 def _product_tokens_conflict(question: str, cached_question_key: str) -> bool:
-    """
-    Return True if the incoming question mentions a specific product that is
-    DIFFERENT from the product mentioned in the cached question key.
-    This prevents 'TC50' question from hitting a 'TC10' cached answer.
-    """
-    q_token     = _extract_product_token(question)
+    q_token      = _extract_product_token(question)
     cached_token = _extract_product_token(cached_question_key)
     if q_token is None or cached_token is None:
-        return False          # no product token in one or both — no conflict
+        return False
     return q_token != cached_token
 
 
@@ -93,7 +130,6 @@ def _get_model():
 
 
 def _embed(text: str) -> np.ndarray:
-    """Return a unit-norm 384-d embedding of the normalised text."""
     from search import normalise_query
     normalised = normalise_query(text)
     vec = _get_model().encode([normalised], convert_to_numpy=True)[0]
@@ -102,7 +138,7 @@ def _embed(text: str) -> np.ndarray:
 
 
 def _cosine(a: np.ndarray, b: np.ndarray) -> float:
-    return float(np.dot(a, b))          # both already unit-norm
+    return float(np.dot(a, b))   # both already unit-norm
 
 
 # ── Semantic cache lookup ─────────────────────────────────────────────────
@@ -123,37 +159,35 @@ def _semantic_lookup(question: str, intent: str) -> str | None:
             .execute()
         )
     except Exception as e:
-        print(f"[cache] DB error during lookup: {e}")
+        print(f"[CACHE] DB error during lookup: {e}")
         return None
 
     rows = result.data or []
     if not rows:
         return None
 
-    # Check if any row has a non-null embedding
     has_embeddings = any(r.get("embedding") is not None for r in rows)
 
     if not has_embeddings:
-        # Embedding column missing or all null — exact match only
+        # Exact-match fallback
         key = _cache_key(question, intent)
         for row in rows:
             if row["question"] == key:
                 answer = row["answer"]
                 if _is_fallback(answer):
-                    print("[cache] invalid cached answer ignored")
+                    print("[CACHE] invalid cached answer ignored (fallback fragment)")
                     return None
                 if _product_tokens_conflict(question, row["question"]):
-                    print(f"[cache] skipped (product mismatch) | cached_q={row['question']}")
+                    print(f"[CACHE] skipped — product mismatch | cached_q={row['question']}")
                     return None
-                print(f"[cache] CACHE HIT (exact) | key={key}")
                 return answer
         return None
 
     # Semantic matching
-    print("[cache] semantic lookup started")
+    print("[CACHE] running semantic similarity lookup …")
     q_vec = _embed(question)
-    best_score = 0.0
-    best_answer = None
+    best_score   = 0.0
+    best_answer  = None
     best_question = None
 
     for row in rows:
@@ -165,20 +199,16 @@ def _semantic_lookup(question: str, intent: str) -> str | None:
         if raw_emb is None:
             continue
 
-        # Product-aware guard: skip if cached question targets a different product
         if _product_tokens_conflict(question, row.get("question", "")):
-            print(f"[cache] skipped (product mismatch) | cached_q={row['question']}")
+            print(f"[CACHE] skipped — product mismatch | cached_q={row['question']}")
             continue
 
-        # Supabase pgvector returns the value as a string "[-0.145,0.019,...]"
-        # when the column type is vector(384). Parse it before converting.
-        print(f"[cache] embedding_type={type(raw_emb).__name__}")
         try:
             if isinstance(raw_emb, str):
                 raw_emb = [float(x) for x in raw_emb.strip("[]").split(",")]
             cached_vec = np.array(raw_emb, dtype=np.float32)
         except Exception as parse_err:
-            print(f"[cache] embedding parse failed for row {row.get('question')}: {parse_err}")
+            print(f"[CACHE] embedding parse failed for {row.get('question')}: {parse_err}")
             continue
 
         norm = np.linalg.norm(cached_vec)
@@ -186,41 +216,68 @@ def _semantic_lookup(question: str, intent: str) -> str | None:
             cached_vec = cached_vec / norm
 
         score = _cosine(q_vec, cached_vec)
-        print(f"[cache] comparing | cached_q={row['question']} | similarity={score:.4f}")
+        print(f"[CACHE] similarity check | cached_q={row['question']} | score={score:.4f}")
         if score > best_score:
-            best_score = score
-            best_answer = answer
+            best_score    = score
+            best_answer   = answer
             best_question = row["question"]
 
     if best_score >= SIMILARITY_THRESHOLD:
-        print(f"[cache] semantic match found | best_q={best_question} | similarity={best_score:.4f}")
+        print(
+            f"[CACHE] semantic match | best_q={best_question} | similarity={best_score:.4f}"
+        )
         return best_answer
 
-    print(f"[cache] semantic match not found | best_q={best_question} | best_similarity={best_score:.4f}")
+    print(
+        f"[CACHE] no match above threshold | best_q={best_question} | "
+        f"best_similarity={best_score:.4f} | threshold={SIMILARITY_THRESHOLD}"
+    )
     return None
 
 
 # ── Public API ────────────────────────────────────────────────────────────
 
 def get_cached_answer(question: str, intent: str = "product_query") -> str | None:
+    """
+    Return a cached answer if available and ENABLE_CACHE is True.
+    Always logs the outcome with QUESTION, KEY, and STATUS.
+    """
+    if not ENABLE_CACHE:
+        _log_cache("DISABLED", question, intent, "ENABLE_CACHE=False → full pipeline will run")
+        return None
+
     try:
         answer = _semantic_lookup(question, intent)
     except Exception as e:
-        print(f"[cache] semantic lookup failed: {type(e).__name__}: {e}")
+        print(f"[CACHE] semantic lookup error: {type(e).__name__}: {e}")
         answer = None
+
     if answer:
+        _log_cache("HIT", question, intent)
         return answer
-    print(f"[cache] CACHE MISS | question={_normalise_question(question)} | intent={intent}")
+
+    _log_cache("MISS", question, intent)
     return None
 
 
 def save_cached_answer(question: str, answer: str, intent: str = "product_query") -> None:
-    # Quality gate
+    """
+    Persist a new answer to the cache — only when ENABLE_CACHE is True and
+    the answer passes the quality gate.
+    """
+    if not ENABLE_CACHE:
+        print("[CACHE] save skipped — ENABLE_CACHE=False")
+        return
+
+    # Never cache purchase intent or out-of-scope responses
+    _UNCACHEABLE_INTENTS = {"purchase_intent", "out_of_scope"}
+    if intent in _UNCACHEABLE_INTENTS:
+        print(f"[CACHE] save skipped — intent={intent} is not cacheable")
+        return
+
     if not _is_quality(answer):
-        if _is_fallback(answer):
-            print("[cache] skip cache | reason=fallback_response")
-        else:
-            print(f"[cache] skip cache | reason=low_quality (len={len(answer.strip())})")
+        reason = "fallback_response" if _is_fallback(answer) else f"low_quality (len={len(answer.strip())})"
+        print(f"[CACHE] SKIPPED — {reason}")
         return
 
     key = _cache_key(question, intent)
@@ -234,25 +291,25 @@ def save_cached_answer(question: str, answer: str, intent: str = "product_query"
         .execute()
     )
     if existing.data:
+        print(f"[CACHE] already stored — no-op | key={key}")
         return
 
     # Try to store with embedding
     try:
         vec = _embed(question).tolist()
         supabase.table("cached_answers").insert({
-            "question": key,
-            "answer":   answer,
+            "question":  key,
+            "answer":    answer,
             "embedding": vec,
         }).execute()
-        print(f"[cache] stored with embedding | key={key}")
+        print(f"[CACHE] STORED (with embedding) | key={key}")
     except Exception:
-        # embedding column may not exist yet — store without it
         try:
             supabase.table("cached_answers").insert({
                 "question": key,
                 "answer":   answer,
             }).execute()
-            print(f"[cache] stored (no embedding column) | key={key}")
-            print("[cache] MIGRATION NEEDED: ALTER TABLE cached_answers ADD COLUMN IF NOT EXISTS embedding vector(384);")
+            print(f"[CACHE] STORED (no embedding column) | key={key}")
+            print("[CACHE] MIGRATION NEEDED: ALTER TABLE cached_answers ADD COLUMN IF NOT EXISTS embedding vector(384);")
         except Exception as e2:
-            print(f"[cache] insert failed: {e2}")
+            print(f"[CACHE] insert failed: {e2}")

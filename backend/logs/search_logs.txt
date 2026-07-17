@@ -63,3 +63,32 @@
 [2026-06-27 00:06:49] SOURCE=faiss | CONFIDENCE=1.00 | PRODUCT=PageWriter TC35 | CATEGORY=Cardiology | QUESTION=PageWriter TC35
 [2026-06-27 00:08:40] SOURCE=dynamic_search | CONFIDENCE=0.85 | PRODUCT=N/A | CATEGORY=Cardiology | QUESTION=What is a Holter Monitor?
 [2026-06-27 00:09:46] SOURCE=faiss | CONFIDENCE=1.00 | PRODUCT=HeartStart FRx AED | CATEGORY=Cardiology | QUESTION=Tell me about HeartStart FRx AED
+[2026-07-01 17:16:56] SOURCE=faiss | CONFIDENCE=1.00 | PRODUCT=PageWriter TC50 | CATEGORY=Cardiology | QUESTION=What are the specifications of PageWriter TC50?
+[2026-07-03 14:36:23] SOURCE=faiss | CONFIDENCE=0.90 | PRODUCT=HeartStart FRx AED | CATEGORY=Cardiology | QUESTION=Compare ecg with defibrillators
+[2026-07-03 14:39:22] SOURCE=faiss | CONFIDENCE=0.90 | PRODUCT=Trilogy EV300 Hospital Ventilator | CATEGORY=PatientMonitoring | QUESTION=Difference between the ventilators and air bed
+[2026-07-03 20:21:59] SOURCE=faiss | CONFIDENCE=0.95 | PRODUCT=PageWriter TC35 | CATEGORY=PatientMonitoring | QUESTION=Explain ECG in simple language.
+[2026-07-03 20:28:48] SOURCE=faiss | CONFIDENCE=0.99 | PRODUCT=HeartStart FRx AED | CATEGORY=PatientMonitoring | QUESTION=Features of HeartStart FRx AED
+[2026-07-03 20:29:41] SOURCE=faiss | CONFIDENCE=0.96 | PRODUCT=Trilogy EV300 Hospital Ventilator | CATEGORY=PatientMonitoring | QUESTION=Specifications of Trilogy EV300
+[2026-07-03 20:31:01] SOURCE=faiss | CONFIDENCE=0.95 | PRODUCT=PageWriter TC35 | CATEGORY=Cardiology | QUESTION=What is ECG?
+[2026-07-03 23:21:00] SOURCE=wikipedia | CONFIDENCE=0.75 | PRODUCT=N/A | CATEGORY=Cardiology | QUESTION=Explain the role of ECG in diagnosing arrhythmias.
+[2026-07-03 23:22:11] SOURCE=faiss | CONFIDENCE=0.95 | PRODUCT=E-Flo 6C Anaesthesia Workstation | CATEGORY=Anaesthesia | QUESTION=Tell me about Surgery Lights
+[2026-07-03 23:23:36] SOURCE=wikipedia | CONFIDENCE=0.80 | PRODUCT=N/A | CATEGORY=Cardiology | QUESTION=What is Ambulatory Blood Pressure (ABPM)
+[2026-07-03 23:24:11] SOURCE=faiss | CONFIDENCE=1.00 | PRODUCT=PageWriter TC50 | CATEGORY=Cardiology | QUESTION=What are the features of PageWriter TC50?
+[2026-07-03 23:25:47] SOURCE=faiss | CONFIDENCE=1.00 | PRODUCT=PageWriter TC50 | CATEGORY=Cardiology | QUESTION=Compare PageWriter TC50 and TC70.
+[2026-07-03 23:54:53] SOURCE=faiss | CONFIDENCE=0.90 | PRODUCT=Cardiac Workstation 7000 vs HeartStart FRx AED | CATEGORY=PatientMonitoring | QUESTION=Compare ECG and Defibrillator
+[2026-07-03 23:55:37] SOURCE=wikipedia | CONFIDENCE=0.82 | PRODUCT=N/A | CATEGORY=Cardiology | QUESTION=Tell me about Ambulatory Blood Pressure (ABPM)
+[2026-07-03 23:56:42] SOURCE=faiss | CONFIDENCE=0.99 | PRODUCT=HeartStart FRx AED | CATEGORY=PatientMonitoring | QUESTION=Tell me about HeartStart FRx AED.
+[2026-07-03 23:58:11] SOURCE=faiss | CONFIDENCE=1.00 | PRODUCT=PageWriter TC50 | CATEGORY=Cardiology | QUESTION=What is PageWriter TC50?
+[2026-07-03 23:58:57] SOURCE=faiss | CONFIDENCE=1.00 | PRODUCT=PageWriter TC50 | CATEGORY=Cardiology | QUESTION=What is PageWriter TC50?
+[2026-07-04 00:35:10] SOURCE=faiss | CONFIDENCE=0.95 | PRODUCT=PageWriter TC35 | CATEGORY=Cardiology | QUESTION=What is ecg?
+[2026-07-04 00:38:01] SOURCE=faiss | CONFIDENCE=0.96 | PRODUCT=Trilogy EV300 Hospital Ventilator | CATEGORY=PatientMonitoring | QUESTION=Tell me about Ventilators
+[2026-07-04 00:38:27] SOURCE=faiss | CONFIDENCE=1.00 | PRODUCT=PageWriter TC50 | CATEGORY=Cardiology | QUESTION=Compare PageWriter TC50 and TC70.
+[2026-07-04 00:39:12] SOURCE=faiss | CONFIDENCE=0.90 | PRODUCT=Cardiac Workstation 7000 vs ST80i Stress Testing System | CATEGORY=PatientMonitoring | QUESTION=Compare ECG machine and stress test system.
+[2026-07-04 00:40:01] SOURCE=faiss | CONFIDENCE=0.99 | PRODUCT=HeartStart FRx AED | CATEGORY=PatientMonitoring | QUESTION=What are the specifications of HeartStart FRx AED?
+[2026-07-04 01:04:29] SOURCE=faiss | CONFIDENCE=0.95 | PRODUCT=Efficia DFM100 | CATEGORY=PatientMonitoring | QUESTION=What are the specifications of Efficia CM120?
+[2026-07-04 01:05:24] SOURCE=dynamic_search | CONFIDENCE=0.73 | PRODUCT=N/A | CATEGORY=PatientMonitoring | QUESTION=Difference between syringe pump and infusion pump?
+[2026-07-04 01:06:28] SOURCE=wikipedia | CONFIDENCE=0.82 | PRODUCT=N/A | CATEGORY=MotherChildCare | QUESTION=What is Phototherapy?
+[2026-07-04 11:50:41] SOURCE=faiss | CONFIDENCE=0.95 | PRODUCT=Efficia DFM100 | CATEGORY=PatientMonitoring | QUESTION=how can i buy any  product
+[2026-07-09 17:38:34] SOURCE=dynamic_search | CONFIDENCE=0.78 | PRODUCT=N/A | CATEGORY=Unknown | QUESTION=what is car
+[2026-07-11 11:36:29] SOURCE=faiss | CONFIDENCE=0.96 | PRODUCT=Cardiac Workstation 7000 | CATEGORY=PatientMonitoring | QUESTION=show me the sample report of this ecg machine
+[2026-07-17 18:43:00] SOURCE=dynamic_search | CONFIDENCE=0.72 | PRODUCT=N/A | CATEGORY=PatientMonitoring | QUESTION=Tell me about Patient Monitoring Devices

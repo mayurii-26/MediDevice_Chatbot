@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, forwardRef } from "react";
 import axios from "axios";
 
-function ContactForm() {
+const ContactForm = forwardRef(function ContactForm(props, ref) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
@@ -36,7 +36,7 @@ function ContactForm() {
   };
 
   return (
-    <div className="contact-form">
+    <div className="contact-form" ref={ref}>
       <h3>📬 Contact Support</h3>
 
       <input
@@ -85,6 +85,6 @@ function ContactForm() {
       )}
     </div>
   );
-}
+});
 
 export default ContactForm;

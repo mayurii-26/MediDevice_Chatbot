@@ -1,8 +1,22 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { CATEGORIES } from "../data/questions";
 
-function CategoryDropdown({ setQuestion, onCategoryChange }) {
-  const [selected, setSelected] = useState("");
+/**
+ * CategoryDropdown
+ * Props:
+ *   setQuestion      (q: string) => void  — fills the chat input
+ *   onCategoryChange (id: string|null) => void — notifies parent of selection
+ *   defaultCategory  string | null  — pre-select a category (e.g. from saved prefs)
+ */
+function CategoryDropdown({ setQuestion, onCategoryChange, defaultCategory }) {
+  const [selected, setSelected] = useState(defaultCategory || "");
+
+  // Sync when defaultCategory changes (e.g. prefs loaded after mount)
+  useEffect(() => {
+    if (defaultCategory && defaultCategory !== selected) {
+      setSelected(defaultCategory);
+    }
+  }, [defaultCategory]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleChange = (e) => {
     const categoryId = e.target.value;

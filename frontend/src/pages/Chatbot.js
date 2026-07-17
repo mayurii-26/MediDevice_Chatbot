@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState, useRef } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "../App.css";
@@ -9,13 +9,14 @@ import VoiceInput from "../components/VoiceInput";
 import ContactForm from "../components/ContactForm";
 import LogoutButton from "../components/LogoutButton";
 import { supabase } from "../lib/supabase";
+import { isPurchaseIntent, PURCHASE_INTENT_REPLY } from "../lib/purchaseIntentDetector";
 
 const API_BASE_URL = "http://127.0.0.1:8000";
 
 const FALLBACK_MESSAGE =
-  "I am a medical device assistant trained on Philips healthcare products. " +
+  "I am a medical device assistant trained on medical device knowledge. " +
   "Please ask about supported medical devices. " +
-  "For further assistance contact support@medidevicechatbot.com";
+  "For further assistance contact support@medideviceai.com";
 
 function Chatbot() {
   const [question, setQuestion] = useState("");
@@ -27,6 +28,7 @@ function Chatbot() {
   const [activeConversationId, setActiveConversationId] = useState(null);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [pdfUrl, setPdfUrl] = useState(null);
+  const contactFormRef = useRef(null); // for scrolling to contact form on purchase intent
 
   const navigate = useNavigate();
   const user = session?.user || null;
@@ -122,6 +124,21 @@ function Chatbot() {
     setMessages((prev) => [...prev, { type: "user", text: userQuestion }]);
     setQuestion("");
     setLoading(true);
+
+    // ── Purchase / price / quote intent — short-circuit BEFORE retrieval ──
+    if (isPurchaseIntent(userQuestion)) {
+      setMessages((prev) => [
+        ...prev,
+        { type: "bot", text: PURCHASE_INTENT_REPLY, isPurchaseIntent: true },
+      ]);
+      setLoading(false);
+      // Scroll the existing ContactForm into view
+      setTimeout(() => {
+        contactFormRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 150);
+      return; // Do NOT call FAISS / BM25 / Gemini / backend
+    }
+    // ─────────────────────────────────────────────────────────────────────
 
     try {
       const headers = await authHeaders();
@@ -227,7 +244,7 @@ function Chatbot() {
       <main className="app">
         <div className="header">
           <h1>🏥 MediDevice Assistant</h1>
-          <p>Powered by Philips Healthcare Knowledge Base</p>
+          <p>AI Medical Knowledge Platform</p>
         </div>
 
         <div className="section">
@@ -248,7 +265,7 @@ function Chatbot() {
         <div className="section">
           <textarea
             rows="3"
-            placeholder="Ask about Philips medical devices..."
+            placeholder="Ask about medical devices..."
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
             onKeyDown={handleKeyDown}
@@ -350,7 +367,7 @@ function Chatbot() {
           </div>
         </div>
 
-        <ContactForm />
+        <ContactForm ref={contactFormRef} />
       </main>
     </div>
 

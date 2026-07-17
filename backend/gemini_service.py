@@ -110,13 +110,23 @@ def _build_specification_prompt(question: str, context: str) -> str:
 The user is asking specifically about the SPECIFICATIONS of a medical device.
 
 Instructions:
-1. Start with: **Technical Specifications — [Product Name]** as a heading.
-2. List every specification as a separate bullet point in this format:
-   - **Specification Name:** Value or description.
-3. Include all specifications present in the context — do not summarise or skip any.
-4. Do NOT include features, marketing text, or general description.
-5. Do NOT output raw "Key: value" metadata lines. Do NOT mention "context" or "database".
-6. If no specifications are available, reply exactly: {_OUT_OF_SCOPE}
+1. Start with the heading: **Technical Specifications — [Product Name]**
+   (replace [Product Name] with the actual product name from the context)
+2. Output ALL specifications as a markdown table in this EXACT format:
+
+   | Parameter | Value |
+   |---|---|
+   | Spec Name | spec value |
+   | Spec Name | spec value |
+
+3. Every specification must be on its own table row — never merge multiple specs into one row.
+4. Use ONLY specifications from the provided context. Do NOT invent values.
+5. Do NOT include features, overview, or marketing text — specifications table only.
+6. Do NOT output bullet points, raw "Key: value" lines, or plain prose.
+7. Do NOT mention "context", "knowledge base", or "database".
+8. If no specifications are present in the context, output exactly this two-line message:
+   Detailed specifications are currently unavailable.
+   Please refer to the official product datasheet.
 
 Product Information:
 {context}
@@ -192,14 +202,18 @@ def _build_general_medical_prompt(question: str, context: str) -> str:
 The user is asking about a general medical concept or technology.
 
 Instructions:
-1. Start with a **## [Medical Concept Name]** heading.
-2. Write a **What it is** paragraph (2-3 sentences): explain the concept clearly and accurately.
-3. Write a **How it works** paragraph (1-2 sentences): explain the clinical mechanism.
-4. Write a **Medical Purpose** paragraph (1-2 sentences): who uses it and when.
-5. If the context mentions related medical devices, add a **## Related Devices** bullet list:
-   - **[Device Name]:** one-line description.
-6. Be medically accurate. Do NOT fabricate product names or clinical claims.
-7. Do NOT mention "context", "web search", or "database".
+1. Start with the heading: # 🏥 [Medical Concept Name]
+   (replace [Medical Concept Name] with the correct name of the concept)
+2. Write a 2-3 sentence summary paragraph explaining what the concept is.
+3. Add a ## Key Points section as a bullet list (3-5 points about how it works or what it measures).
+4. Add a ## Common Uses section as a bullet list (3-5 clinical uses or situations where it is used).
+5. Add a ## Benefits section as a bullet list (3-4 clinical benefits).
+6. If the context mentions specific medical device products by name, add a ## Related Philips Products section as a bullet list:
+   - **[Product Name]**
+7. Be medically accurate. Use ONLY information from the context — do NOT fabricate clinical claims.
+8. Do NOT mention "context", "web search", "Wikipedia", "DuckDuckGo", or "database".
+9. Do NOT copy raw search result titles or URLs.
+10. Do NOT output "What it is:" / "How it works:" prose paragraphs — use the section headings above.
 
 Context:
 {context}
@@ -215,15 +229,17 @@ def _build_web_prompt(question: str, context: str) -> str:
 {_FORMAT_RULES}
 
 Instructions:
-1. Write a clean, professional answer based on the provided search information.
-2. Structure the answer as:
-   - **What it is:** 1-2 sentences defining the device or concept.
-   - **Medical Purpose:** 1-2 sentences on its clinical role.
-   - **How it is used:** 1-2 sentences on clinical application.
-   - **Key Benefits:** 2-4 bullet points.
-3. Do NOT copy search snippets verbatim. Synthesise into professional prose.
-4. Do NOT mention "search results", "web search", "DuckDuckGo", or any search engine name.
-5. If results are not relevant to the question, reply exactly: {_OUT_OF_SCOPE}
+1. Start with the heading: # 🏥 [Medical Concept Name]
+   (replace [Medical Concept Name] with the correct name of the concept or device)
+2. Write a 2-3 sentence summary paragraph explaining what the concept is.
+3. Add a ## Key Points section as a bullet list (3-5 points).
+4. Add a ## Common Uses section as a bullet list (3-5 clinical uses).
+5. Add a ## Benefits section as a bullet list (3-4 clinical benefits).
+6. If related medical device products are mentioned, add a ## Related Philips Products section.
+7. Synthesise from the search context — do NOT copy snippets verbatim.
+8. Do NOT mention "search results", "web search", "DuckDuckGo", or any search engine name.
+9. Do NOT output raw URLs or result titles.
+10. If results are not relevant to the question, reply exactly: {_OUT_OF_SCOPE}
 
 Search Context:
 {context}
@@ -241,14 +257,18 @@ def _build_wikipedia_prompt(question: str, context: str) -> str:
 The context contains verified medical background information from a trusted reference source.
 
 Instructions:
-1. Start with a **## [Medical Concept Name]** heading.
-2. Write a **What it is** paragraph (2-3 sentences) explaining the concept accurately.
-3. Write a **How it works** paragraph (1-2 sentences) on the clinical mechanism.
-4. Write a **Medical Purpose** paragraph (1-2 sentences) on who uses it and when.
-5. If related medical devices are mentioned in the context, add a **## Related Devices** bullet list.
-6. Be medically accurate. Do NOT fabricate names, numbers, or clinical claims.
-7. Do NOT mention "Wikipedia", "web search", "context", or "database".
-8. If the context is not relevant to the question, reply exactly: {_OUT_OF_SCOPE}
+1. Start with the heading: # 🏥 [Medical Concept Name]
+   (replace [Medical Concept Name] with the correct name of the concept)
+2. Write a 2-3 sentence summary paragraph explaining what the concept is.
+3. Add a ## Key Points section as a bullet list (3-5 points about how it works or what it measures).
+4. Add a ## Common Uses section as a bullet list (3-5 clinical uses or situations).
+5. Add a ## Benefits section as a bullet list (3-4 clinical benefits).
+6. If related medical device products are mentioned in the context, add a ## Related Philips Products section:
+   - **[Product Name]**
+7. Be medically accurate. Do NOT fabricate names, numbers, or clinical claims.
+8. Do NOT mention "Wikipedia", "web search", "context", or "database".
+9. Do NOT copy raw URLs, reference numbers, or source headings.
+10. If the context is not relevant to the question, reply exactly: {_OUT_OF_SCOPE}
 
 Medical Background:
 {context}
@@ -400,64 +420,85 @@ def _extract_bullets(text: str, max_bullets: int = 12, min_bullets: int = 8) -> 
 
 def _format_raw_context(chunks: list, intent: str = "product_query", question: str = "") -> str:
     """
-    Structured fallback when Gemini is unavailable.
+    Deterministic fallback when Gemini is unavailable or its refiner call fails.
 
-    Routes to the intent-specific fallback_formatter instead of dumping
-    raw extracted bullets.  This guarantees proper markdown output even
-    when the LLM is down.
+    Always routes through response_refiner.refine() — the single source of
+    truth for formatting — so the output is identical regardless of whether
+    Gemini is available.
 
-    FIX 1 (2026-07-03): Previously the emoji section headers (📦 Product, etc.)
-    were stripped before passing to fallback_formatter.  The new formatter
-    parsers rely on those headers to extract product names and sections, so
-    we now pass chunks unchanged.
-
-    FIX 2 (2026-07-03): In app.py, multiple product chunks are joined into a
-    single string with '\\n\\n---\\n\\n' before being added to combined_context.
-    For comparison queries (and any multi-product context), we split on that
-    separator so each product chunk reaches the formatter as a separate item.
+    If the incoming chunks are raw FAISS chunks (Product Name: / Category: /
+    Description: / Features: / Specifications: labels), they are first
+    pre-formatted through the same _format_product_chunk() logic used by
+    app.py before reaching response_refiner.  This guarantees the refiner
+    always receives the '📦 Product / Category / Summary / Features /
+    Specifications' structure it expects.
     """
     if not chunks:
         return _OUT_OF_SCOPE
 
     try:
-        from fallback_formatter import (
-            format_product_answer, format_feature_answer,
-            format_specification_answer, format_comparison_answer,
-            format_category_answer, format_general_medical_answer,
-        )
+        # ── Determine whether chunks need pre-formatting ──────────────────
+        # Chunks that came from combined_context (already formatted by
+        # app.py._format_product_chunk) start with the '📦 Product' header.
+        # Raw FAISS chunks start with 'Product Name: ...'.
+        # We pre-format only the raw ones to avoid double-processing.
+        def _looks_raw(chunk: str) -> bool:
+            return bool(_re.search(r"(?m)^Product Name\s*:", chunk))
 
-        # Split each combined-context string on the '---' separator so that
-        # individual product chunks are separated list items
-        raw_chunks: list[str] = []
+        def _format_product_chunk(chunk: str) -> str:
+            """Mirror of app.py._format_product_chunk — converts raw FAISS text."""
+            from search.common import extract_product_name, extract_category
+            name     = extract_product_name(chunk) or "Unknown Product"
+            category = extract_category(chunk) or "Unknown"
+
+            desc_m = _re.search(
+                r"Description:\s*(.+?)(?=\nFeatures:|\nSpecifications:|$)",
+                chunk, _re.DOTALL,
+            )
+            description = desc_m.group(1).strip() if desc_m else ""
+
+            parts = [f"📦 Product\n\n{name}\n\nCategory\n{category}"]
+
+            if description:
+                parts.append(f"Summary\n\n{description}")
+
+            feat_m = _re.search(r"Features:\s*\n((?:- .+\n?)+)", chunk)
+            if feat_m:
+                parts.append(f"Features\n\n{feat_m.group(1).strip()}")
+
+            spec_m = _re.search(r"Specifications:\s*\n((?:- .+\n?)+)", chunk)
+            if spec_m:
+                parts.append(f"Specifications\n\n{spec_m.group(1).strip()}")
+
+            return "\n\n".join(parts)
+
+        # Split combined-context strings on the '---' separator so each
+        # product chunk is a separate item, then pre-format raw ones.
+        formatted_chunks: list[str] = []
         for c in chunks:
             if not isinstance(c, str) or not c.strip():
                 continue
-            # Split on the section divider added by _format_product_chunk joining
             parts = _re.split(r"\n\n---\n\n", c)
             for part in parts:
-                if part.strip():
-                    raw_chunks.append(part.strip())
+                if not part.strip():
+                    continue
+                if _looks_raw(part):
+                    formatted_chunks.append(_format_product_chunk(part.strip()))
+                else:
+                    formatted_chunks.append(part.strip())
 
-        if not raw_chunks:
+        if not formatted_chunks:
             return _OUT_OF_SCOPE
 
-        if intent == "feature_query":
-            result = format_feature_answer(raw_chunks)
-        elif intent == "specification_query":
-            result = format_specification_answer(raw_chunks)
-        elif intent == "comparison_query":
-            result = format_comparison_answer(raw_chunks)
-        elif intent == "category_query":
-            result = format_category_answer(raw_chunks)
-        elif intent == "general_medical_query":
-            result = format_general_medical_answer(question, raw_chunks)
-        else:
-            result = format_product_answer(raw_chunks)
-
+        # ── Route through response_refiner (single formatter) ────────────
+        from response_refiner import refine as _refine
+        result = _refine(question, formatted_chunks, "faiss", intent)
         if result and len(result.strip()) > 40:
+            print(f"[gemini] _format_raw_context via response_refiner | intent={intent} | chars={len(result)}")
             return result
+
     except Exception as exc:
-        print(f"[gemini] fallback_formatter error: {exc}")
+        print(f"[gemini] _format_raw_context error: {exc}")
 
     return _OUT_OF_SCOPE
 
@@ -516,6 +557,61 @@ def generate_answer(question: str, context: list, source: str = "faiss", intent:
     gemini_result = _call_gemini(prompt)
 
     if gemini_result and len(gemini_result.strip()) > len(base_answer) * 0.5:
+        # ── Comparison guard: Gemini must return a table, not raw prose ───
+        # ── Comparison guard: must have ### sections or a table ──────────
+        # format_comparison() now emits ### sections (no table).
+        # Accept Gemini output that has either ### headers or a | table.
+        if intent == COMPARISON_QUERY:
+            _has_section = any(
+                l.strip().startswith("###")
+                for l in gemini_result.splitlines()
+            )
+            _has_table = any(
+                l.strip().startswith("|") and l.strip().endswith("|")
+                for l in gemini_result.splitlines()
+            )
+            if not _has_section and not _has_table:
+                print(
+                    f"[gemini] COMPARISON STRUCTURE MISSING in Gemini output "
+                    f"— using refiner | intent={intent} | source={source}"
+                )
+                return base_answer
+
+        # ── Specification guard: must have bullets or table ───────────────
+        # format_specifications() now emits "• **Param:** value" bullets.
+        # Accept bullet list, markdown table, or unavailable message.
+        if intent == SPECIFICATION_QUERY:
+            _spec_unavail = "detailed specifications are currently unavailable"
+            _has_bullets  = "•" in gemini_result
+            _has_table    = any(
+                l.strip().startswith("|") and l.strip().endswith("|")
+                for l in gemini_result.splitlines()
+            )
+            if not _has_bullets and not _has_table and _spec_unavail not in gemini_result.lower():
+                print(
+                    f"[gemini] SPECIFICATION CONTENT MISSING in Gemini output "
+                    f"— using refiner | intent={intent} | source={source}"
+                )
+                return base_answer
+
+        # ── General medical guard: must have 🏥 heading or known sections ─
+        if intent == GENERAL_MEDICAL:
+            _has_hc_heading = any(
+                "\U0001f3e5" in line   # 🏥 U+1F3E5
+                for line in gemini_result.splitlines()
+            )
+            _known_secs = (
+                "### What it is", "### Purpose", "### Clinical Use",
+                "## Key Points", "## Common Uses",
+            )
+            _sec_count = sum(1 for s in _known_secs if s in gemini_result)
+            if not _has_hc_heading and _sec_count < 2:
+                print(
+                    f"[gemini] GENERAL_MEDICAL STRUCTURE MISSING in Gemini output "
+                    f"— using refiner | intent={intent} | source={source}"
+                )
+                return base_answer
+
         print(f"[gemini] ANSWER SOURCE: gemini_polish | intent={intent} | source={source}")
         return gemini_result
 
@@ -587,13 +683,69 @@ async def generate_answer_streaming(question: str, context: list, source: str = 
                 stream=True,
             )
             token_count = 0
-            for chunk in response:
-                if hasattr(chunk, "text") and chunk.text:
-                    token_count += 1
-                    yield chunk.text
-            print(f"[gemini/stream] RESPONSE COMPLETE | key={i + 1} | chunks_yielded={token_count}")
-            print(f"[gemini/stream] ANSWER SOURCE: gemini_polish | intent={intent} | source={source}")
-            return  # Gemini succeeded — done
+
+            # ── Structure-required guard: buffer the full response first ──
+            # For comparison_query, specification_query, and general_medical_query
+            # we must verify correct structure before emitting tokens.
+            if intent in (COMPARISON_QUERY, SPECIFICATION_QUERY, GENERAL_MEDICAL):
+                buffered = ""
+                for chunk in response:
+                    if hasattr(chunk, "text") and chunk.text:
+                        buffered += chunk.text
+                        token_count += 1
+
+                # Check structural requirement per intent
+                if intent == COMPARISON_QUERY:
+                    _ok = any(
+                        l.strip().startswith("###")
+                        for l in buffered.splitlines()
+                    ) or any(
+                        l.strip().startswith("|") and l.strip().endswith("|")
+                        for l in buffered.splitlines()
+                    )
+                    _reason = "### sections or table"
+                elif intent == SPECIFICATION_QUERY:
+                    _spec_unavail = "detailed specifications are currently unavailable"
+                    _ok = (
+                        "•" in buffered
+                        or any(l.strip().startswith("|") and l.strip().endswith("|") for l in buffered.splitlines())
+                        or _spec_unavail in buffered.lower()
+                    )
+                    _reason = "bullets or table"
+                else:  # GENERAL_MEDICAL
+                    _has_hc = any("\U0001f3e5" in l for l in buffered.splitlines())
+                    _known_secs = ("### What it is", "### Purpose", "### Clinical Use",
+                                   "## Key Points", "## Common Uses")
+                    _sec_count = sum(1 for s in _known_secs if s in buffered)
+                    _ok = _has_hc or _sec_count >= 2
+                    _reason = "🏥 heading or sections"
+
+                if _ok:
+                    print(
+                        f"[gemini/stream] RESPONSE COMPLETE ({intent}, {_reason} OK) "
+                        f"| key={i + 1} | chunks_buffered={token_count}"
+                    )
+                    print(f"[gemini/stream] ANSWER SOURCE: gemini_polish | intent={intent} | source={source}")
+                    chunk_size = 64
+                    for pos in range(0, len(buffered), chunk_size):
+                        yield buffered[pos:pos + chunk_size]
+                    return
+                else:
+                    print(
+                        f"[gemini/stream] STRUCTURE MISSING ({_reason}) in Gemini output "
+                        f"— using refiner | key={i + 1} | intent={intent} | source={source}"
+                    )
+                    break
+
+            else:
+                # Non-comparison: stream tokens as they arrive (original behaviour)
+                for chunk in response:
+                    if hasattr(chunk, "text") and chunk.text:
+                        token_count += 1
+                        yield chunk.text
+                print(f"[gemini/stream] RESPONSE COMPLETE | key={i + 1} | chunks_yielded={token_count}")
+                print(f"[gemini/stream] ANSWER SOURCE: gemini_polish | intent={intent} | source={source}")
+                return  # Gemini succeeded — done
 
         except Exception as e:
             if _is_quota_error(e):

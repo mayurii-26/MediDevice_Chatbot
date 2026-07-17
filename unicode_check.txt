@@ -1,0 +1,63 @@
+﻿python : Line 3: U+2500: \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u25
+00\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2
+500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u
+2500\u2500\u2500\u2500\u2500
+At line:1 char:38
++ cd C:\Users\DELL\MediDevice_Chatbot; python -c "
++                                      ~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Line 3: U+2500:...500\u2500\u2500:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+Line 18: U+2014:   4. In DRY-RUN mode (default): prints a full report � nothi
+Line 24: U+2705:   \u2705 Only touches the `cached_answers` table.
+Line 25: U+2705:   \u2705 Never deletes rows classified as CLEAN.
+Line 26: U+2705:   \u2705 Never touches `conversations`, `messages`, `device_docum
+Line 29: U+2705:   \u2705 Defaults to DRY-RUN � pass --live to actually delete.
+Line 30: U+2705:   \u2705 Prints every decision with its reason so results are aud
+Line 48: U+2500: # \u2500\u2500 Make project root importable \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u25
+00\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+Line 60: U+2500: # \u2500\u2500 Cutoff datetime \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u250
+0\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u25
+00\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+Line 69: U+2500: # \u2500\u2500 Corruption signatures \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u250
+0\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u25
+00\u2500\u2500
+Line 83: U+2500:     # \u2500\u2500 Old formatter heading style \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\
+u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+Line 84: U+1F4E6:     # Old fallback_formatter emitted "\U0001f4e6 **Product Informatio
+Line 87: U+1F4E6:         "old_heading: '\U0001f4e6 **Product Information**'",
+Line 88: U+1F4E6:         re.compile(r"\U0001f4e6\s*\*\*Product Information\*\*", re.IG
+Line 121: U+2500:     # \u2500\u2500 Raw metadata that leaked from FAISS chunks 
+\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+Line 143: U+2500:     # \u2500\u2500 Word concatenation � sign that text was joined with
+Line 151: U+2500:     # \u2500\u2500 Fallback / error response text \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2
+500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+Line 170: U+2500:     # \u2500\u2500 Purchase / OOS intent replies that got cached despi
+Line 185: U+2500:     # \u2500\u2500 Sample report intent replies \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u250
+0\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+Line 204: U+2014:       (b) a fallback / intent reply signature matches (regar
+Line 212: U+2500:     # \u2500\u2500 Parse created_at \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u250
+0\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u25
+00\u2500\u2500\u2500
+Line 227: U+2500:     # \u2500\u2500 Always-corrupt signatures (date-independent) \u2500\u2500\u2500\u2500\u2500\u2500
+Line 228: U+2014:     # These are the fallback/intent reply fragments � if the
+Line 257: U+2014:     label_list = "\n    ".join(reasons) if reasons else "�"
+Line 262: U+2026:         f"  PREVIEW : {answer_preview}�\n"
+Line 272: U+2014:     print(f"  MediDevice Chatbot � Cache Cleanup Script")
+Line 279: U+2500:     # \u2500\u2500 Fetch all cached_answers rows \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u25
+00\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+Line 280: U+2026:     print("[INFO] Fetching all cached_answers rows �")
+Line 296: U+2014:         print("[INFO] Cache is empty � nothing to clean up."
+Line 299: U+2500:     # \u2500\u2500 Classify each row \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u25
+00\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2
+500\u2500\u2500
+Line 310: U+2500:     # \u2500\u2500 Print report \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2
+500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u
+2500\u2500\u2500\u2500\u2500\u2500\u2500
+Line 334: U+2500:     # \u2500\u2500 Delete corrupted rows (live mode only) 
+\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+Line 336: U+2705:         print("[INFO] No corrupted rows found. Cache is clea
+Line 348: U+2026:     print(f"[LIVE] Deleting {len(corrupted_rows)} corrupted 
+Line 355: U+2014:             print(f"  [SKIP] Row has no id � skipping (quest
+Line 363: U+2014:             print(f"  [ERROR]   {row_id}  � {e}")
+Line 372: U+26A0:         print(f"\n  \u26a0\ufe0f  {len(failed_ids)} row(s) could not b

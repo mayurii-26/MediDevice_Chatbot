@@ -13,7 +13,7 @@ from search import smart_search
 from gemini_service import generate_answer, generate_answer_streaming
 from email_service import send_email
 from logger import log_search
-from intent_detector import detect_intent, is_purchase_intent, is_out_of_scope
+from intent_detector import detect_intent, is_purchase_intent, is_out_of_scope, is_sample_report_intent
 from document_service import get_categories, get_subcategories, get_documents, get_documents_by_product, get_documents_by_names
 
 from cache_service import (
@@ -46,6 +46,183 @@ _FALLBACK = (
     "Please ask about supported medical devices. "
     "For further assistance contact support@medideviceai.com"
 )
+
+
+# ══════════════════════════════════════════════════════════════════════════
+# SHARED PIPELINE HELPERS
+# ══════════════════════════════════════════════════════════════════════════
+
+import re as _re
+from search.common import extract_product_name, extract_category
+
+
+def _format_product_chunk(chunk: str) -> str:
+    """
+    Convert a raw FAISS product chunk into the structured markdown format
+    expected by response_refiner and the Gemini prompts.
+
+    Input (raw FAISS):
+        Product Name: PageWriter TC50
+        Category: Cardiology
+        Description: ...
+        Features:
+        - Feature A: detail
+        Specifications:
+        - Spec A: value
+
+    Output (formatted):
+        📦 Product
+
+        PageWriter TC50
+
+        Category
+        Cardiology
+
+        Summary
+
+        ...
+
+        Features
+
+        - Feature A: detail
+
+        Specifications
+
+        - Spec A: value
+
+    This function is the SINGLE definition used by both /chat and
+    /chat/stream.  It must never be redefined inline in the handlers.
+    """
+    name     = extract_product_name(chunk) or "Unknown Product"
+    category = extract_category(chunk) or "Unknown"
+
+    desc_m = _re.search(
+        r"Description:\s*(.+?)(?=\nFeatures:|\nSpecifications:|$)",
+        chunk, _re.DOTALL,
+    )
+    description = desc_m.group(1).strip() if desc_m else ""
+
+    parts = [f"📦 Product\n\n{name}\n\nCategory\n{category}"]
+
+    if description:
+        parts.append(f"Summary\n\n{description}")
+
+    feat_m = _re.search(r"Features:\s*\n((?:- .+\n?)+)", chunk)
+    if feat_m:
+        parts.append(f"Features\n\n{feat_m.group(1).strip()}")
+
+    spec_m = _re.search(r"Specifications:\s*\n((?:- .+\n?)+)", chunk)
+    if spec_m:
+        parts.append(f"Specifications\n\n{spec_m.group(1).strip()}")
+
+    return "\n\n".join(parts)
+
+
+def _build_combined_context(result, intent: str) -> list[str]:
+    """
+    Build the structured context list from a SearchResult.
+
+    Used identically by /chat and /chat/stream so both endpoints
+    always pass the same context format to generate_answer /
+    generate_answer_streaming.
+    """
+    from search.common import deduplicate_by_product
+    from intent_detector import COMPARISON_QUERY
+
+    combined_context: list[str] = []
+
+    if result.chunks:
+        chunks_to_use = result.chunks
+        if result.matched_product and intent != COMPARISON_QUERY:
+            chunks_to_use = [
+                c for c in result.chunks
+                if (extract_product_name(c) or "").lower() == result.matched_product.lower()
+            ] or result.chunks
+
+        unique_chunks = deduplicate_by_product(chunks_to_use)
+        formatted     = [_format_product_chunk(c) for c in unique_chunks]
+        combined_context.append("\n\n---\n\n".join(formatted))
+
+    if result.pdf_chunks:
+        from gemini_service import _extract_bullets
+        sections = ["📄 PDF Knowledge"]
+        for pc in result.pdf_chunks:
+            bullets    = _extract_bullets(pc["chunk_text"], max_bullets=8, min_bullets=3)
+            highlights = "\n".join(f"- {b}" for b in bullets) if bullets else pc["chunk_text"][:300]
+            sections.append(
+                f"Source\n\n{pc['document_name']}\nPage {pc['page_number']}\n\n"
+                f"Highlights\n\n{highlights}"
+            )
+        combined_context.append("\n\n".join(sections))
+
+    if result.source == "dynamic_search" and result.chunks:
+        combined_context = [
+            "🌐 Dynamic Search\n\n" + "\n\n".join(result.chunks)
+        ]
+
+    # Context cleaning
+    try:
+        from pipeline.context_cleaner import clean_chunks
+        combined_context = clean_chunks(combined_context, intent=intent)
+    except Exception as _cc_err:
+        print(f"[PIPELINE] context_cleaner error (non-fatal): {_cc_err}")
+
+    return combined_context
+
+
+def _build_retry_context(result, intent: str) -> list[str]:
+    """
+    Build fresh context for the response_validator retry path.
+
+    Produces the same format as _build_combined_context but always uses
+    raw result.chunks without the context_cleaner, so sections that were
+    dropped by cleaning are available for the refiner retry.
+    """
+    from search.common import deduplicate_by_product
+    from intent_detector import COMPARISON_QUERY
+
+    if not result.chunks:
+        return []
+
+    chunks_to_use = result.chunks
+    if result.matched_product and intent != COMPARISON_QUERY:
+        chunks_to_use = [
+            c for c in result.chunks
+            if (extract_product_name(c) or "").lower() == result.matched_product.lower()
+        ] or result.chunks
+
+    unique_chunks = deduplicate_by_product(chunks_to_use)
+    formatted     = [_format_product_chunk(c) for c in unique_chunks]
+    return ["\n\n---\n\n".join(formatted)]
+
+
+def _sse_encode(token: str) -> str:
+    """
+    Encode a response token for safe transmission as an SSE data line.
+
+    Problem: SSE uses bare newlines as event delimiters.  A token like
+    "\\n\\n" in the response body is misread as two empty events, so the
+    newline is silently dropped and consecutive markdown sections run
+    together: "PageWriter TC50CardiologyOverview..."
+
+    Solution: replace every bare \\n with the literal two-character
+    sequence "\\\\n" before writing `data: <token>\\n\\n`.
+    The frontend decodes "\\\\n" back to "\\n" before rendering.
+
+    Characters escaped:
+        \\n  →  \\\\n   (newline — SSE line separator)
+    """
+    return token.replace("\n", "\\n")
+
+
+def _sse_decode(data: str) -> str:
+    """
+    Inverse of _sse_encode — called in the SSE reader on the frontend.
+    Defined here for documentation; the actual decode runs in JS.
+
+    JS equivalent:  data.replace(/\\\\n/g, '\\n')
+    """
+    return data.replace("\\n", "\n")
 
 
 def _title_from_question(question: str) -> str:
@@ -170,6 +347,32 @@ def chat(req: ChatRequest, authorization: str | None = Header(default=None)):
             )
         # ──────────────────────────────────────────────────────────────────
 
+        # ── Sample Report Request intent guard ────────────────────────────
+        # Short-circuit BEFORE cache, FAISS, BM25, Wikipedia, and Gemini.
+        # Any request for sample/example reports returns a canned response
+        # directing the user to the Contact Support form.
+        # These responses are deliberately NOT cached.
+        if is_sample_report_intent(req.question):
+            print("[PIPELINE] ▶ Sample Report Intent DETECTED → bypassing full pipeline (no cache)")
+            _pipeline["answer_source"] = "sample_report_intent_guard"
+            _print_pipeline_report()
+            _sample_report_reply = (
+                "Sample reports related information is not available through the chatbot.\n\n"
+                "Please contact our support team and we'll get back to you shortly."
+            )
+            if conversation_id:
+                save_message(conversation_id, "assistant", _sample_report_reply)
+            return ChatResponse(
+                answer=_sample_report_reply,
+                source="sample_report_intent",
+                matched_product=None,
+                matched_category="Unknown",
+                confidence=0.0,
+                conversation_id=conversation_id,
+                documents=[],
+            )
+        # ──────────────────────────────────────────────────────────────────
+
         # ── Out-of-scope query guard ───────────────────────────────────────
         # Short-circuit BEFORE cache, FAISS, BM25, Wikipedia, and Gemini.
         # Queries unrelated to medical devices / healthcare return immediately.
@@ -267,80 +470,8 @@ def chat(req: ChatRequest, authorization: str | None = Header(default=None)):
         else:
             print(f"[PIPELINE] ▶ Step 4 — Wikipedia      : ❌ not used (source={result.source})")
 
-        # ── Build structured context ───────────────────────────────────────
-        combined_context = []
-
-        if result.chunks:
-            from search.common import deduplicate_by_product, extract_product_name, extract_category
-            import re as _re
-
-            def _format_product_chunk(chunk: str) -> str:
-                """
-                Format a product chunk for the Gemini prompt.
-
-                Preserves ALL structured sections from the chunk (Description,
-                Features, Specifications) so intent-specific prompts receive
-                the full data they need.
-                """
-                name     = extract_product_name(chunk) or "Unknown Product"
-                category = extract_category(chunk) or "Unknown"
-
-                desc_m = _re.search(
-                    r"Description:\s*(.+?)(?=\nFeatures:|\nSpecifications:|$)",
-                    chunk, _re.DOTALL
-                )
-                description = desc_m.group(1).strip() if desc_m else ""
-
-                parts = [f"📦 Product\n\n{name}\n\nCategory\n{category}"]
-
-                if description:
-                    parts.append(f"Summary\n\n{description}")
-
-                feat_m = _re.search(r"Features:\s*\n((?:- .+\n?)+)", chunk)
-                if feat_m:
-                    parts.append(f"Features\n\n{feat_m.group(1).strip()}")
-
-                spec_m = _re.search(r"Specifications:\s*\n((?:- .+\n?)+)", chunk)
-                if spec_m:
-                    parts.append(f"Specifications\n\n{spec_m.group(1).strip()}")
-
-                return "\n\n".join(parts)
-
-            from intent_detector import COMPARISON_QUERY
-            chunks_to_use = result.chunks
-            if result.matched_product and intent != COMPARISON_QUERY:
-                chunks_to_use = [
-                    c for c in result.chunks
-                    if (extract_product_name(c) or "").lower() == result.matched_product.lower()
-                ] or result.chunks
-
-            unique_chunks = deduplicate_by_product(chunks_to_use)
-            formatted = [_format_product_chunk(c) for c in unique_chunks]
-            combined_context.append("\n\n---\n\n".join(formatted))
-
-        if result.pdf_chunks:
-            from gemini_service import _extract_bullets
-            sections = ["📄 PDF Knowledge"]
-            for pc in result.pdf_chunks:
-                bullets = _extract_bullets(pc["chunk_text"], max_bullets=8, min_bullets=3)
-                highlights = "\n".join(f"- {b}" for b in bullets) if bullets else pc["chunk_text"][:300]
-                sections.append(
-                    f"Source\n\n{pc['document_name']}\nPage {pc['page_number']}\n\n"
-                    f"Highlights\n\n{highlights}"
-                )
-            combined_context.append("\n\n".join(sections))
-
-        if result.source == "dynamic_search" and result.chunks:
-            combined_context = [
-                "🌐 Dynamic Search\n\n" + "\n\n".join(result.chunks)
-            ]
-
-        # ── Context cleaning ───────────────────────────────────────────────
-        try:
-            from pipeline.context_cleaner import clean_chunks
-            combined_context = clean_chunks(combined_context)
-        except Exception as _cc_err:
-            print(f"[PIPELINE] context_cleaner error (non-fatal): {_cc_err}")
+        # ── Build structured context (shared helper) ──────────────────────
+        combined_context = _build_combined_context(result, intent)
 
         # ── Gemini ─────────────────────────────────────────────────────────
         print("[PIPELINE] ▶ Step 5 — Gemini         : generating answer …")
@@ -366,15 +497,17 @@ def chat(req: ChatRequest, authorization: str | None = Header(default=None)):
                 has_context=bool(combined_context),
             )
             if not vr.is_valid:
-                # The refiner is the guaranteed base — only truly empty or
-                # sentinel responses reach here.  Re-run refiner directly on
-                # the raw result.chunks (may differ from combined_context
-                # when context_cleaner dropped sections).
                 print(f"[PIPELINE]   Validation FAILED: {vr.reason} → re-running refiner on raw chunks")
                 _pipeline["response_regenerated"] = True
                 try:
                     from response_refiner import refine as _refine
-                    answer = _refine(req.question, result.chunks, result.source, intent)
+                    _retry_context = _build_retry_context(result, intent)
+                    answer = _refine(
+                        req.question,
+                        _retry_context or combined_context,
+                        result.source,
+                        intent,
+                    )
                 except Exception as _ref_err:
                     print(f"[PIPELINE]   refiner retry error: {_ref_err}")
                 answer = answer or _FALLBACK
@@ -529,6 +662,36 @@ async def chat_stream(req: ChatRequest, authorization: str | None = Header(defau
                 return
             # ────────────────────────────────────────────────────────────────
 
+            # ── Sample Report Request intent guard ─────────────────────────
+            # Short-circuit BEFORE cache, FAISS, BM25, Wikipedia, and Gemini.
+            # Immediately streams a canned response — response is NOT cached.
+            if is_sample_report_intent(req.question):
+                print("[PIPELINE/stream] ▶ Sample Report Intent DETECTED → bypassing full pipeline (no cache)")
+                _pipeline["answer_source"] = "sample_report_intent_guard"
+                _sample_report_reply = (
+                    "Sample reports related information is not available through the chatbot.\n\n"
+                    "Please contact our support team and we'll get back to you shortly."
+                )
+                if conversation_id:
+                    save_message(conversation_id, "assistant", _sample_report_reply)
+                # Stream the canned reply in small chunks (natural typing feel)
+                chunk_size = 40
+                for i in range(0, len(_sample_report_reply), chunk_size):
+                    yield f"data: {_sample_report_reply[i:i+chunk_size]}\n\n"
+                    await asyncio.sleep(0.01)
+                meta = {
+                    "source": "sample_report_intent",
+                    "matched_product": None,
+                    "matched_category": "Unknown",
+                    "confidence": 0.0,
+                    "conversation_id": conversation_id,
+                    "documents": [],
+                }
+                _print_stream_pipeline_report()
+                yield f"data: [META]{json.dumps(meta)}\n\n"
+                return
+            # ────────────────────────────────────────────────────────────────
+
             # ── Out-of-scope query guard ────────────────────────────────────
             # Short-circuit BEFORE cache, FAISS, BM25, Wikipedia, and Gemini.
             # Streams a canned reply immediately for off-topic queries.
@@ -575,7 +738,7 @@ async def chat_stream(req: ChatRequest, authorization: str | None = Header(defau
                         pass
                 chunk_size = 32
                 for i in range(0, len(cached_answer), chunk_size):
-                    yield f"data: {cached_answer[i:i+chunk_size]}\n\n"
+                    yield f"data: {_sse_encode(cached_answer[i:i+chunk_size])}\n\n"
                     await asyncio.sleep(0.008)
                 meta = {
                     "source": "cache",
@@ -630,84 +793,21 @@ async def chat_stream(req: ChatRequest, authorization: str | None = Header(defau
             else:
                 print(f"[PIPELINE/stream] ▶ Step 4 — Wikipedia      : ❌ not used (source={result.source})")
 
-            # ── Build context ──────────────────────────────────────────────
-            combined_context = []
-            if result.chunks:
-                from search.common import deduplicate_by_product, extract_product_name, extract_category
-                import re as _re
-
-                def _format_product_chunk(chunk: str) -> str:
-                    name     = extract_product_name(chunk) or "Unknown Product"
-                    category = extract_category(chunk) or "Unknown"
-
-                    desc_m = _re.search(
-                        r"Description:\s*(.+?)(?=\nFeatures:|\nSpecifications:|$)",
-                        chunk, _re.DOTALL
-                    )
-                    description = desc_m.group(1).strip() if desc_m else ""
-
-                    parts = [f"📦 Product\n\n{name}\n\nCategory\n{category}"]
-
-                    if description:
-                        parts.append(f"Summary\n\n{description}")
-
-                    feat_m = _re.search(r"Features:\s*\n((?:- .+\n?)+)", chunk)
-                    if feat_m:
-                        parts.append(f"Features\n\n{feat_m.group(1).strip()}")
-
-                    spec_m = _re.search(r"Specifications:\s*\n((?:- .+\n?)+)", chunk)
-                    if spec_m:
-                        parts.append(f"Specifications\n\n{spec_m.group(1).strip()}")
-
-                    return "\n\n".join(parts)
-
-                from intent_detector import COMPARISON_QUERY
-                chunks_to_use = result.chunks
-                if result.matched_product and intent != COMPARISON_QUERY:
-                    chunks_to_use = [
-                        c for c in result.chunks
-                        if (extract_product_name(c) or "").lower() == result.matched_product.lower()
-                    ] or result.chunks
-
-                from search.common import deduplicate_by_product
-                unique_chunks = deduplicate_by_product(chunks_to_use)
-                formatted = [_format_product_chunk(c) for c in unique_chunks]
-                combined_context.append("\n\n---\n\n".join(formatted))
-
-            if result.pdf_chunks:
-                from gemini_service import _extract_bullets
-                sections = ["📄 PDF Knowledge"]
-                for pc in result.pdf_chunks:
-                    bullets = _extract_bullets(pc["chunk_text"], max_bullets=8, min_bullets=3)
-                    highlights = "\n".join(f"- {b}" for b in bullets) if bullets else pc["chunk_text"][:300]
-                    sections.append(
-                        f"Source\n\n{pc['document_name']}\nPage {pc['page_number']}\n\n"
-                        f"Highlights\n\n{highlights}"
-                    )
-                combined_context.append("\n\n".join(sections))
-
-            if result.source == "dynamic_search" and result.chunks:
-                combined_context = ["🌐 Dynamic Search\n\n" + "\n\n".join(result.chunks)]
-
-            # ── Context cleaning ───────────────────────────────────────────
-            try:
-                from pipeline.context_cleaner import clean_chunks
-                combined_context = clean_chunks(combined_context)
-            except Exception as _cc_err:
-                print(f"[PIPELINE/stream] context_cleaner error (non-fatal): {_cc_err}")
+            # ── Build context (shared helper) ──────────────────────────────
+            combined_context = _build_combined_context(result, intent)
 
             # ── Stream Gemini tokens ───────────────────────────────────────
             print("[PIPELINE/stream] ▶ Step 5 — Gemini         : streaming answer …")
             full_answer = ""
             async for token in generate_answer_streaming(req.question, combined_context, result.source, intent):
                 full_answer += token
-                yield f"data: {token}\n\n"
+                yield f"data: {_sse_encode(token)}\n\n"
                 await asyncio.sleep(0)
             _pipeline["gemini_executed"] = True
 
             if not full_answer:
                 full_answer = _FALLBACK
-                yield f"data: {_FALLBACK}\n\n"
+                yield f"data: {_sse_encode(_FALLBACK)}\n\n"
 
             print(f"[PIPELINE/stream]   Gemini answer length : {len(full_answer)} chars")
 
@@ -727,13 +827,19 @@ async def chat_stream(req: ChatRequest, authorization: str | None = Header(defau
                     _pipeline["response_regenerated"] = True
                     try:
                         from response_refiner import refine as _refine
-                        full_answer = _refine(req.question, result.chunks, result.source, intent)
+                        _retry_context_s = _build_retry_context(result, intent)
+                        full_answer = _refine(
+                            req.question,
+                            _retry_context_s or combined_context,
+                            result.source,
+                            intent,
+                        )
                     except Exception as _ref_err:
                         print(f"[PIPELINE/stream]   refiner retry error: {_ref_err}")
                     full_answer = full_answer or _FALLBACK
                     chunk_size = 64
                     for i in range(0, len(full_answer), chunk_size):
-                        yield f"data: {full_answer[i:i+chunk_size]}\n\n"
+                        yield f"data: {_sse_encode(full_answer[i:i+chunk_size])}\n\n"
                         await asyncio.sleep(0.008)
                 else:
                     print("[PIPELINE/stream]   Validation PASSED ✅")

@@ -17,6 +17,7 @@ import DownloadModal from "./DownloadModal";
 import ContactForm from "./ContactForm";
 import { isPurchaseIntent, PURCHASE_INTENT_REPLY } from "../lib/purchaseIntentDetector";
 import { isOutOfScope, OUT_OF_SCOPE_REPLY } from "../lib/outOfScopeDetector";
+import { isSampleReportIntent, SAMPLE_REPORT_REPLY } from "../lib/sampleReportDetector";
 
 const API_BASE_URL = "http://127.0.0.1:8000";
 const FALLBACK_MESSAGE =
@@ -387,6 +388,24 @@ function ChatWidget({ onClose, onMinimize }) {
     }
     // ─────────────────────────────────────────────────────────────────────
 
+    // ── Sample Report Request intent — short-circuit BEFORE retrieval ────
+    // Any request for sample/example ECG reports, PDF samples, etc.
+    // returns a canned reply with a "Fill Contact Form" button.
+    if (isSampleReportIntent(q)) {
+      if (!isRegenerate) {
+        setMessages(p => [...p, { type: "user", text: q, timestamp: new Date() }]);
+        setQuestion("");
+      }
+      setMessages(p => [...p, {
+        type: "bot",
+        text: SAMPLE_REPORT_REPLY,
+        timestamp: new Date(),
+        isSampleReportIntent: true,
+      }]);
+      return; // Do NOT proceed to FAISS / BM25 / Gemini / stream
+    }
+    // ─────────────────────────────────────────────────────────────────────
+
     // ── Out-of-scope query guard — short-circuit BEFORE retrieval ────────
     if (isOutOfScope(q)) {
       if (!isRegenerate) {
@@ -446,9 +465,7 @@ function ChatWidget({ onClose, onMinimize }) {
 
         for (const line of lines) {
           if (!line.startsWith("data: ")) continue;
-          // Slice off "data: " prefix — do NOT trim() because Gemini tokens
-          // include leading/trailing whitespace that is part of markdown
-          // formatting (spaces between words, newlines between paragraphs).
+          // Slice off "data: " prefix.
           const data = line.slice(6);
           if (!data) continue;
           const trimmed = data.trim();
@@ -458,10 +475,13 @@ function ChatWidget({ onClose, onMinimize }) {
           } else if (trimmed.startsWith("[ERROR]")) {
             throw new Error(trimmed.slice(7).trim());
           } else {
-            // Preserve the token exactly as the server sent it — do not add
-            // extra spaces or strip existing ones.  The Gemini streaming API
-            // already includes correct inter-word spacing.
-            fullText += data;
+            // Decode SSE-encoded newlines back to real newlines.
+            // The backend encodes \n → \\n so that SSE line boundaries
+            // are never confused with markdown paragraph breaks.
+            // Without this decode: "PageWriter TC50CardiologyOverview..."
+            // With this decode:    correct spacing between every section.
+            const decoded = data.replace(/\\n/g, "\n");
+            fullText += decoded;
             setStreamingText(fullText);
           }
         }
@@ -778,6 +798,41 @@ function ChatWidget({ onClose, onMinimize }) {
                 </div>
               )}
               {/* ─────────────────────────────────────────────────────────── */}
+
+              {/* ── Persistent contact button for sample report intent messages ── */}
+              {msg.type === "bot" && msg.isSampleReportIntent && (
+                <div style={{ marginTop: 10 }}>
+                  <button
+                    onClick={() => setShowContactForm(true)}
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 7,
+                      padding: "8px 14px",
+                      borderRadius: 8,
+                      border: `1.5px solid ${C.sky}`,
+                      background: C.skyLight,
+                      color: C.sky,
+                      fontWeight: 700,
+                      fontSize: "0.82rem",
+                      cursor: "pointer",
+                      fontFamily: "inherit",
+                      transition: "background 0.15s, transform 0.1s",
+                    }}
+                    onMouseEnter={e => {
+                      e.currentTarget.style.background = C.skyMid;
+                      e.currentTarget.style.transform = "translateY(-1px)";
+                    }}
+                    onMouseLeave={e => {
+                      e.currentTarget.style.background = C.skyLight;
+                      e.currentTarget.style.transform = "none";
+                    }}
+                  >
+                    📩 Fill Contact Form
+                  </button>
+                </div>
+              )}
+              {/* ──────────────────────────────────────────────────────────────── */}
 
               {/* ── Persistent contact button for out-of-scope messages ── */}
               {msg.type === "bot" && msg.isOutOfScope && (

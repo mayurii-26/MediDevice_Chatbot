@@ -13,6 +13,7 @@ COMPARISON_QUERY   = "comparison_query"
 CATEGORY_QUERY     = "category_query"
 GENERAL_MEDICAL    = "general_medical_query"
 PURCHASE_INTENT    = "purchase_intent"  # Phase 5.2 — bypasses all retrieval
+SAMPLE_REPORT_INTENT = "sample_report_intent"  # bypasses all retrieval — returns canned reply
 
 # ── Purchase / Price / Quote keywords ─────────────────────────────────────
 # Mirrors purchaseIntentDetector.js on the frontend so both layers agree.
@@ -66,6 +67,76 @@ def is_purchase_intent(query: str) -> bool:
     if not query or not isinstance(query, str):
         return False
     return bool(_PURCHASE_RE.search(query.strip()))
+
+
+# ── Sample Report Request detection ───────────────────────────────────────
+# Mirrors sampleReportDetector.js on the frontend so both layers agree.
+_SAMPLE_REPORT_PHRASES = [
+    # "sample" combinations
+    "sample report",
+    "sample ecg report",
+    "sample ecg",
+    "sample output",
+    "sample patient report",
+    "sample pdf",
+    "sample print",
+    "sample printout",
+    "sample result",
+    "sample test report",
+    "sample document",
+    "sample reading",
+    # "example" combinations
+    "example report",
+    "example ecg",
+    "example ecg report",
+    "example output",
+    "example patient report",
+    "example pdf",
+    "example result",
+    # "report format" combinations
+    "report format",
+    "ecg report format",
+    "report template",
+    "report layout",
+    "report structure",
+    "report style",
+    # "ECG print" combinations
+    "ecg print sample",
+    "ecg printout sample",
+    "ecg print example",
+    "ecg printout",
+    "ecg print",
+    # "PDF report" combinations
+    "pdf report sample",
+    "pdf report example",
+    "pdf sample",
+    "pdf example",
+    "pdf output",
+    # generic demo/preview report requests
+    "demo report",
+    "report preview",
+    "report demo",
+    "report specimen",
+    "specimen report",
+]
+
+_SAMPLE_REPORT_RE = re.compile(
+    "|".join(
+        re.escape(phrase) for phrase in _SAMPLE_REPORT_PHRASES
+    ),
+    re.IGNORECASE,
+)
+
+
+def is_sample_report_intent(query: str) -> bool:
+    """
+    Returns True when the query is requesting a sample / example report.
+    Runs BEFORE the retrieval pipeline — no FAISS / BM25 / Wikipedia / Gemini
+    should execute if this returns True, and the response must NOT be cached.
+    """
+    if not query or not isinstance(query, str):
+        return False
+    return bool(_SAMPLE_REPORT_RE.search(query.strip()))
 
 
 # ── Out-of-scope detection (Phase 5.3) ────────────────────────────────────
@@ -290,6 +361,15 @@ _GENERAL_MEDICAL_TERMS = {
     "surgical lamp", "operation theatre lights", "ot lights",
     "surgical table", "operating table",
     "surgical equipment", "operation theatre equipment",
+    # Devices that are NOT in the Philips FAISS catalog.
+    # If FAISS is asked about these it returns a wrong product (high similarity
+    # to Trilogy/DFM100/Oscar due to shared clinical vocabulary).
+    # Route to general_medical so Wikipedia/web gives a correct answer.
+    "holter monitor", "holter",
+    "bubble cpap", "bubble c-pap",
+    "infusion pump", "infusion pumps",
+    "syringe pump", "syringe pumps",
+    "patient monitoring device", "patient monitoring equipment",
 }
 
 # Medical device names that exist in (or are closely related to) our catalog.
@@ -360,6 +440,26 @@ def detect_intent(query: str) -> str:
         for term in _GENERAL_MEDICAL_TERMS:
             if term in q:
                 return GENERAL_MEDICAL
+
+        # Generic device-concept queries with no product name → general_medical
+        # so Wikipedia/web explains the concept rather than FAISS returning
+        # whichever product happens to be semantically closest.
+        # "ecg" / "electrocardiogram" alone (without a model number) is a
+        # concept question: "Tell me about ECG", "What is an ECG" etc.
+        _concept_only_terms = {
+            "ecg", "electrocardiogram", "ekg",
+            "defibrillator", "aed",
+            "ventilator", "cpap",
+            "pulse oximeter",
+        }
+        # Check: no known product fragment AND query is a concept question
+        _concept_triggers = ("tell me about", "what is", "explain", "describe",
+                              "how does", "what are", "overview of")
+        _is_concept_q = any(t in q for t in _concept_triggers)
+        if _is_concept_q:
+            for term in _concept_only_terms:
+                if term in q:
+                    return GENERAL_MEDICAL
 
         # Device names in our catalog → product_query so FAISS can match them
         for term in _DEVICE_NAME_TERMS:

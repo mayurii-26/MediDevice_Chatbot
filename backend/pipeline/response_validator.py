@@ -188,4 +188,62 @@ def validate_response(
                 f"product_name_absent (expected='{matched_product}')"
             )
 
+    # ── Comparison query must contain product section headers ─────────────
+    # format_comparison() now emits "### Product A" / "### Product B" /
+    # "### Key Differences" / "### Recommendation" — no markdown table.
+    # Accept if: has at least one "###" section header, OR has a "|" table
+    # (Gemini may still produce a table and that is fine too).
+    if intent == "comparison_query" and has_context:
+        _has_section = any(
+            line.strip().startswith("###")
+            for line in stripped.splitlines()
+        )
+        _has_table = any(
+            line.strip().startswith("|") and line.strip().endswith("|")
+            for line in stripped.splitlines()
+        )
+        if not _has_section and not _has_table:
+            return ValidationResult(
+                False,
+                "comparison_missing_structure (no ### sections or table found)"
+            )
+
+    # ── Specification query must contain bullet specs or unavailable msg ──
+    # format_specifications() now emits "• **Param:** value" bullets.
+    # Accept if: has "•" bullets, OR a markdown table, OR the unavailable msg.
+    if intent == "specification_query" and has_context:
+        _spec_unavailable = "detailed specifications are currently unavailable"
+        _has_bullets  = "•" in stripped
+        _has_table    = any(
+            line.strip().startswith("|") and line.strip().endswith("|")
+            for line in stripped.splitlines()
+        )
+        _has_unavail  = _spec_unavailable in stripped.lower()
+        if not _has_bullets and not _has_table and not _has_unavail:
+            return ValidationResult(
+                False,
+                "specification_missing_content (no bullets, table, or unavailable message)"
+            )
+
+    # ── General medical query must contain 🏥 heading or known sections ───
+    # format_general_medical() now emits "## 🏥 <Concept>" with
+    # "### What it is" / "### Purpose" / "### Clinical Use" sections.
+    if intent == "general_medical_query" and has_context:
+        _has_hc_heading = any(
+            "\U0001f3e5" in line   # 🏥 U+1F3E5
+            for line in stripped.splitlines()
+        )
+        _known_sections = (
+            "### What it is", "### Purpose", "### Clinical Use",
+            "### Related Devices",
+            # legacy section names still accepted (Gemini may produce them)
+            "## Key Points", "## Common Uses", "## Benefits",
+        )
+        _section_count = sum(1 for s in _known_sections if s in stripped)
+        if not _has_hc_heading and _section_count < 2:
+            return ValidationResult(
+                False,
+                "general_medical_missing_structure (no 🏥 heading and fewer than 2 section headers)"
+            )
+
     return ValidationResult(True, "ok")

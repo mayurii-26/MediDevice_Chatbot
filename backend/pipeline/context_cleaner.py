@@ -208,19 +208,49 @@ def _dedup_sentences(chunks: list[str]) -> list[str]:
     return result
 
 
-def clean_chunks(chunks: list[str]) -> list[str]:
+def _is_comparison_context(chunks: list[str]) -> bool:
+    """
+    Return True if the chunk list represents a comparison context
+    (i.e. chunks from two or more distinct products).
+
+    Detection heuristics (any one is sufficient):
+      1. More than one '📦 Product' header is present across all chunks.
+      2. Any single chunk contains the '\\n\\n---\\n\\n' separator that
+         app.py uses to join multiple product chunks before passing to
+         context_cleaner.
+
+    When True, cross-chunk deduplication is skipped so that feature and
+    description lines from the *second* product are not erroneously dropped
+    because they happen to look similar to lines from the first product.
+    """
+    product_headers = 0
+    for chunk in chunks:
+        # Count '📦 Product' section headers across all chunks
+        product_headers += len(re.findall(r"📦\s*Product", chunk))
+        # A single combined-context string already contains both products
+        if "\n\n---\n\n" in chunk:
+            return True
+    return product_headers >= 2
+
+
+def clean_chunks(chunks: list[str], intent: str = "") -> list[str]:
     """
     Clean a list of formatted context chunks.
 
     Steps:
       1. Per-chunk noise-line removal (preserves line structure via \\n join).
       2. Cross-chunk line deduplication (structural labels exempt).
+         SKIPPED for comparison_query intent or when two-product context is
+         detected — dedup across product chunks strips content from the
+         second product that is needed for the comparison table.
       3. Drop chunks that are too short after cleaning.
 
     Parameters
     ----------
     chunks : formatted context strings (output of _format_product_chunk
              or the PDF highlights section in app.py)
+    intent : optional intent string; pass "comparison_query" to force-skip
+             cross-chunk deduplication
 
     Returns
     -------
@@ -240,13 +270,29 @@ def clean_chunks(chunks: list[str]) -> list[str]:
         return []
 
     # Step 2 — cross-chunk deduplication
-    step2 = _dedup_sentences(step1)
-
-    print(
-        f"[context_cleaner] input={len(chunks)} | "
-        f"after_noise={len(step1)} | "
-        f"after_dedup={len(step2)}"
+    # Skip for comparison queries: the second product's content looks
+    # "duplicate" relative to the first product's content (same feature
+    # bullet prefixes, same category label values, similar descriptions).
+    # Deduplicating across products strips the data needed for the table.
+    skip_dedup = (
+        intent == "comparison_query"
+        or _is_comparison_context(step1)
     )
+
+    if skip_dedup:
+        step2 = step1
+        print(
+            f"[context_cleaner] input={len(chunks)} | "
+            f"after_noise={len(step1)} | "
+            f"dedup=SKIPPED (comparison context)"
+        )
+    else:
+        step2 = _dedup_sentences(step1)
+        print(
+            f"[context_cleaner] input={len(chunks)} | "
+            f"after_noise={len(step1)} | "
+            f"after_dedup={len(step2)}"
+        )
 
     return step2
 

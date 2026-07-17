@@ -233,24 +233,117 @@ def _specs(chunk: str) -> list[str]:
 
 def _wiki_summary(chunks: list[str]) -> str:
     """
-    Extract and summarise Wikipedia / dynamic search content.
-    Returns at most 4 clean sentences; strips URLs, source lines, titles.
+    Extract clean prose sentences from Wikipedia / DuckDuckGo / web-search
+    context chunks.
+
+    Returns at most 4 clean sentences. Aggressively filters:
+      - URLs and source lines
+      - DuckDuckGo "Title: body" prefixes (any casing)
+      - Wikipedia page-title lines
+      - MedicalExpo / vendor / navigation headings
+      - Bare domain names (e.g. "medicalexpo.com", "en.wikipedia.org")
+      - Short-fragment lines (< 6 words)
+      - Duplicate sentences (case-insensitive)
+
+    Never concatenates raw search snippets — only prose that reads as a
+    complete, grammatically correct sentence is kept.
+
+    Handles three chunk formats:
+      1. Wikipedia:   '📚 Medical Background'
+      2. DuckDuckGo:  '🌐 Dynamic Search'
+      3. Web results: '[Web Search Results]'
     """
+    # ── Compile noise patterns once ────────────────────────────────────────
+    _url_re      = re.compile(r"https?://\S+|www\.\S+|\S+\.(com|org|net|io|edu|gov)\b[^\s]*", re.I)
+    _source_re   = re.compile(r"^\s*source\s*:.*$", re.I | re.M)
+    _domain_re   = re.compile(r"^\s*\S+\.(com|org|net|io|edu|gov|co)\S*\s*$", re.I)
+    # DuckDuckGo returns "Title: body" — strip everything up to and including the first ": "
+    # even when title is lower-case (e.g. "ecg machine: An ECG...")
+    _ddg_prefix_re = re.compile(r"^[^:.\n]{3,80}:\s+", re.M)
+    # Marketing / navigation headings
+    _nav_re      = re.compile(
+        r"(?m)^(MedicalExpo|Manufacturer|Find|Browse|Compare|Filter|Sort|Results|Shop|"
+        r"Home|Menu|Navigation|Advertisement|Sponsored|Related|More|Search|Contact|"
+        r"About|Privacy|Terms|Cookie)\b.*$",
+        re.I,
+    )
+    # Wikipedia / title-case short lines with no terminal punctuation
+    _title_re    = re.compile(r"^[A-Z][A-Za-z\s\-]{0,60}$")
+
+    all_sentences: list[str] = []
+
     for chunk in chunks:
-        if "📚 Medical Background" in chunk or "🌐 Dynamic Search" in chunk:
-            # Remove the header line
+        is_wiki = "📚 Medical Background" in chunk
+        is_ddg  = "🌐 Dynamic Search" in chunk
+        is_web  = chunk.lstrip().startswith("[Web Search Results]")
+
+        if not (is_wiki or is_ddg or is_web):
+            continue
+
+        # ── Strip block headers ────────────────────────────────────────────
+        if is_wiki or is_ddg:
             text = re.sub(r"^.*?(?:Background|Search)\n+", "", chunk, flags=re.DOTALL)
-            # Remove source / URL lines
-            text = re.sub(r"Source\s*:.*", "", text, flags=re.I)
-            text = re.sub(r"https?://\S+", "", text)
-            # Clean up
-            text = re.sub(r"\n{2,}", " ", text).strip()
-            text = re.sub(r"\s{2,}", " ", text)
-            # Split into sentences, take up to 4
-            sents = re.split(r"(?<=[.!?])\s+", text)
-            sents = [s.strip() for s in sents if len(s.strip()) > 20]
-            return " ".join(sents[:4])
-    return ""
+        else:
+            text = re.sub(r"^\[Web Search Results\]\s*\n*", "", chunk, flags=re.I | re.M)
+
+        # ── Remove source/URL lines ────────────────────────────────────────
+        text = _source_re.sub("", text)
+        text = _url_re.sub("", text)
+
+        # ── Strip DuckDuckGo "Title: " prefixes from every line ────────────
+        # This handles "ECG machine: An ECG records..." → "An ECG records..."
+        text = _ddg_prefix_re.sub("", text)
+
+        # ── Remove navigation / marketing headings ─────────────────────────
+        text = _nav_re.sub("", text)
+
+        # ── Remove bare domain names ───────────────────────────────────────
+        text = re.sub(r"(?m)^\s*\S+\.(com|org|net|io|edu|gov|co)\S*\s*$", "", text, flags=re.I)
+
+        # ── Collapse whitespace ────────────────────────────────────────────
+        text = re.sub(r"\n+", " ", text)
+        text = re.sub(r"\s{2,}", " ", text).strip()
+
+        # ── Strip stray title tokens prepended to sentences ────────────────
+        # e.g. "Electrocardiogram An electrocardiogram is..." →
+        #      "An electrocardiogram is..."
+        # Pattern: a title-case word (no trailing punct) followed immediately
+        # by a capital letter starting real prose.
+        text = re.sub(r"\b([A-Z][a-z]{3,}(?:\s+[A-Z][a-z]+){0,4})\s+(?=[A-Z])", "", text)
+
+        # ── Sentence split ─────────────────────────────────────────────────
+        raw_sents = re.split(r"(?<=[.!?])\s+", text)
+
+        for s in raw_sents:
+            s = s.strip()
+            # Must look like prose: terminal punctuation, ≥ 6 words, no bare "Title" patterns
+            if len(s) < 25:
+                continue
+            if len(s.split()) < 6:
+                continue
+            if not re.search(r"[.!?]$", s):
+                continue
+            # Reject lines that still look like a title (all title-case, ≤ 7 words, no verb markers)
+            if _title_re.match(s) and len(s.split()) <= 7:
+                continue
+            # Reject lines that still contain a URL fragment
+            if _url_re.search(s):
+                continue
+            all_sentences.append(s)
+
+    if not all_sentences:
+        return ""
+
+    # ── Deduplicate (case-insensitive, exact) ──────────────────────────────
+    seen: set[str] = set()
+    unique: list[str] = []
+    for s in all_sentences:
+        key = re.sub(r"\s+", " ", s.lower().strip())
+        if key not in seen:
+            seen.add(key)
+            unique.append(s)
+
+    return " ".join(unique[:4])
 
 
 def _is_dynamic(chunks: list[str]) -> bool:
@@ -268,8 +361,12 @@ def _is_dynamic(chunks: list[str]) -> bool:
 
 def format_product(question: str, context: list[str]) -> str:
     """
-    product_query — Name, Overview (2-3 sentences), Key Features,
-    Applications, Advantages.  Never dumps raw metadata.
+    product_query — spec format:
+        📦 Product Name
+        Category
+        Overview (2-3 sentences)
+        Applications
+        Documents note
     """
     chunks = _split_chunks(context)
     if not chunks:
@@ -288,68 +385,61 @@ def format_product(question: str, context: list[str]) -> str:
     title = product or "Medical Device"
     L: list[str] = []
 
-    # Title
-    L.append(f"# {title}")
+    # ── Header ─────────────────────────────────────────────────────────────
+    L.append(f"## 📦 {title}")
     if cat:
         L.append(f"*{cat}*")
     L.append("")
 
-    # Overview — max 3 sentences, never a raw dump
+    # ── Overview ───────────────────────────────────────────────────────────
     if desc:
+        L.append("### Overview")
+        L.append("")
         L.append(desc)
         L.append("")
 
-    # Key Features
+    # ── Key Features ───────────────────────────────────────────────────────
     if feat:
-        L.append("## Key Features")
+        L.append("### Key Features")
         L.append("")
         for f in feat:
             if ":" in f:
                 name, _, detail = f.partition(":")
-                L.append(f"- **{name.strip()}** — {detail.strip()}")
+                L.append(f"• **{name.strip()}** — {detail.strip()}")
             else:
-                L.append(f"- {f}")
+                L.append(f"• {f}")
         L.append("")
 
-    # Specifications as table
+    # ── Specifications ─────────────────────────────────────────────────────
     if spec:
-        L.append("## Specifications")
+        L.append("### Specifications")
         L.append("")
-        L.append("| Parameter | Value |")
-        L.append("|---|---|")
         for s in spec:
             if ":" in s:
                 k, _, v = s.partition(":")
-                L.append(f"| {k.strip()} | {v.strip()} |")
+                L.append(f"• **{k.strip()}:** {v.strip()}")
             else:
-                L.append(f"| {s} | — |")
+                L.append(f"• {s}")
         L.append("")
 
-    # Applications — inferred from category + features
-    app_lines: list[str] = []
+    # ── Applications ───────────────────────────────────────────────────────
+    L.append("### Applications")
+    L.append("")
     if cat:
-        app_lines.append(f"Professional use in **{cat}** clinical environments.")
+        L.append(f"• Professional use in **{cat}** clinical environments")
+    L.append("• Hospitals, diagnostic centres, and specialist clinics")
     if feat:
-        # Pull feature names that sound like use-cases
-        for f in feat[:3]:
+        for f in feat[:2]:
             name = f.partition(":")[0].strip()
-            if any(w in name.lower() for w in ("monitor", "detect", "record", "measur", "acqui", "print", "store", "transfer", "connect")):
-                app_lines.append(f"- {name}")
-    if app_lines:
-        L.append("## Applications")
-        L.append("")
-        for a in app_lines:
-            L.append(a)
-        L.append("")
+            if any(w in name.lower() for w in ("monitor", "detect", "record", "measur", "print", "connect")):
+                L.append(f"• {name}")
+    L.append("")
 
-    # Advantages — from features, kept short
-    if feat and len(feat) >= 3:
-        L.append("## Advantages")
-        L.append("")
-        for f in feat[:4]:
-            name = f.partition(":")[0].strip()
-            L.append(f"- {name}")
-        L.append("")
+    # ── Documents ──────────────────────────────────────────────────────────
+    L.append("### Documents")
+    L.append("")
+    L.append("• Product datasheets and user manuals may be available — use the Documents section above.")
+    L.append("")
 
     print(f"[refiner] format_product | product={product!r} | feat={len(feat)} | spec={len(spec)}")
     return "\n".join(L).rstrip()
@@ -368,22 +458,21 @@ def format_features(question: str, context: list[str]) -> str:
     feat    = _features(chunk)
 
     L: list[str] = []
-    heading = f"# Features of {product}" if product else "# Key Features"
-    L.append(heading)
+    device  = product or "this device"
+    L.append(f"## ✨ Features — {product}" if product else "## ✨ Features")
     L.append("")
 
     if feat:
         for f in feat:
             if ":" in f:
                 name, _, detail = f.partition(":")
-                L.append(f"- **{name.strip()}** — {detail.strip()}")
+                L.append(f"• **{name.strip()}** — {detail.strip()}")
             else:
-                L.append(f"- {f}")
+                L.append(f"• {f}")
         L.append("")
-        device = product or "this device"
         L.append(
             f"The **{device}** is designed for professional clinical use, "
-            f"combining these features to support accurate diagnosis and efficient workflows."
+            f"combining these capabilities to support accurate diagnosis and efficient workflows."
         )
     else:
         desc = _description(chunk)
@@ -399,7 +488,9 @@ def format_features(question: str, context: list[str]) -> str:
 
 def format_specifications(question: str, context: list[str]) -> str:
     """
-    specification_query — specifications table only.
+    specification_query — spec format:
+        📋 Technical Specifications — Product Name
+        bullet list of specifications
     """
     chunks = _split_chunks(context)
     if not chunks:
@@ -410,22 +501,20 @@ def format_specifications(question: str, context: list[str]) -> str:
     spec    = _specs(chunk)
 
     L: list[str] = []
-    heading = f"# Technical Specifications — {product}" if product else "# Technical Specifications"
-    L.append(heading)
+    L.append(f"## 📋 Technical Specifications — {product}" if product else "## 📋 Technical Specifications")
     L.append("")
 
     if spec:
-        L.append("| Parameter | Value |")
-        L.append("|---|---|")
         for s in spec:
             if ":" in s:
                 k, _, v = s.partition(":")
-                L.append(f"| {k.strip()} | {v.strip()} |")
+                L.append(f"• **{k.strip()}:** {v.strip()}")
             else:
-                L.append(f"| {s} | — |")
+                L.append(f"• {s}")
         L.append("")
     else:
-        L.append("Detailed specifications are not currently available for this product.")
+        L.append("Detailed specifications are currently unavailable.")
+        L.append("Please refer to the official product datasheet.")
         desc = _description(chunk)
         if desc:
             L.append("")
@@ -437,8 +526,12 @@ def format_specifications(question: str, context: list[str]) -> str:
 
 def format_comparison(question: str, context: list[str]) -> str:
     """
-    comparison_query — side-by-side table + Key Differences + Recommendation.
-    Never says 'information unavailable' if both products exist.
+    comparison_query — spec format:
+        📊 Comparison
+        Product A section
+        Product B section
+        Key Differences
+        Recommendation
     """
     chunks = _split_chunks(context)
     if not chunks:
@@ -465,73 +558,90 @@ def format_comparison(question: str, context: list[str]) -> str:
     L: list[str] = []
 
     if len(products) < 2:
-        # Only one product found
         p = products[0] if products else None
         if not p:
             return _NO_INFO
-        L.append(f"# Comparison")
+        L.append("## 📊 Comparison")
         L.append("")
         L.append(
-            f"> ⚠️ Only **{p['name']}** was found. "
-            f"The second product could not be retrieved."
+            f"⚠️ Only one product was found in the knowledge base.\n\n"
+            f"**{p['name']}** was retrieved but the second product could not be found. "
+            f"Showing available details below."
         )
         L.append("")
         L += format_product(question, context).splitlines()
         return "\n".join(L).rstrip()
 
     p1, p2 = products[0], products[1]
-    L.append(f"# {p1['name']} vs {p2['name']}")
+    L.append(f"## 📊 {p1['name']} vs {p2['name']}")
     L.append("")
 
-    # Helper: truncate for table cells
-    def _td(s: str, n: int = 110) -> str:
-        return (s[:n] + "…") if s and len(s) > n else (s or "—")
-
-    # Main comparison table
-    L.append(f"| Attribute | {p1['name']} | {p2['name']} |")
-    L.append("|---|---|---|")
-    L.append(f"| Category | {p1['cat']} | {p2['cat']} |")
-    L.append(f"| Overview | {_td(p1['desc'])} | {_td(p2['desc'])} |")
-
-    # Feature rows — use feature name as row label when both share it
-    max_f = max(len(p1["feat"]), len(p2["feat"]))
-    for i in range(min(max_f, 6)):
-        r1 = p1["feat"][i] if i < len(p1["feat"]) else "—"
-        r2 = p2["feat"][i] if i < len(p2["feat"]) else "—"
-        label = r1.partition(":")[0].strip() if ":" in r1 else f"Feature {i+1}"
-        v1 = r1.partition(":")[2].strip() if ":" in r1 else r1
-        v2 = r2.partition(":")[2].strip() if ":" in r2 else r2
-        L.append(f"| {label} | {v1 or r1} | {v2 or r2} |")
-
-    # Spec rows
-    max_s = max(len(p1["spec"]), len(p2["spec"]))
-    for i in range(min(max_s, 5)):
-        r1 = p1["spec"][i] if i < len(p1["spec"]) else "—"
-        r2 = p2["spec"][i] if i < len(p2["spec"]) else "—"
-        label = r1.partition(":")[0].strip() if ":" in r1 else f"Spec {i+1}"
-        v1 = r1.partition(":")[2].strip() if ":" in r1 else r1
-        v2 = r2.partition(":")[2].strip() if ":" in r2 else r2
-        L.append(f"| {label} | {v1 or r1} | {v2 or r2} |")
-
+    # ── Product A ──────────────────────────────────────────────────────────
+    L.append(f"### {p1['name']}")
+    L.append(f"*{p1['cat']}*")
     L.append("")
+    if p1["desc"] and p1["desc"] != "—":
+        L.append(p1["desc"])
+        L.append("")
+    if p1["feat"]:
+        for f in p1["feat"][:5]:
+            if ":" in f:
+                n, _, d = f.partition(":")
+                L.append(f"• **{n.strip()}** — {d.strip()}")
+            else:
+                L.append(f"• {f}")
+        L.append("")
 
-    # Key differences
-    L.append("## Key Differences")
+    # ── Product B ──────────────────────────────────────────────────────────
+    L.append(f"### {p2['name']}")
+    L.append(f"*{p2['cat']}*")
+    L.append("")
+    if p2["desc"] and p2["desc"] != "—":
+        L.append(p2["desc"])
+        L.append("")
+    if p2["feat"]:
+        for f in p2["feat"][:5]:
+            if ":" in f:
+                n, _, d = f.partition(":")
+                L.append(f"• **{n.strip()}** — {d.strip()}")
+            else:
+                L.append(f"• {f}")
+        L.append("")
+
+    # ── Key Differences ────────────────────────────────────────────────────
+    L.append("### Key Differences")
     L.append("")
     diffs: list[str] = []
     if len(p1["feat"]) != len(p2["feat"]):
-        more = p1["name"] if len(p1["feat"]) > len(p2["feat"]) else p2["name"]
-        diffs.append(f"**{more}** has more documented features ({max(len(p1['feat']), len(p2['feat']))} vs {min(len(p1['feat']), len(p2['feat']))}).")
+        more  = p1["name"] if len(p1["feat"]) > len(p2["feat"]) else p2["name"]
+        less  = p2["name"] if more == p1["name"] else p1["name"]
+        diffs.append(
+            f"**{more}** has more documented features "
+            f"({max(len(p1['feat']), len(p2['feat']))} vs "
+            f"{min(len(p1['feat']), len(p2['feat']))})."
+        )
     if p1["cat"] != p2["cat"] and p1["cat"] != "—" and p2["cat"] != "—":
-        diffs.append(f"**{p1['name']}** is in the **{p1['cat']}** category; **{p2['name']}** is in **{p2['cat']}**.")
+        diffs.append(
+            f"**{p1['name']}** is categorised under **{p1['cat']}**; "
+            f"**{p2['name']}** is under **{p2['cat']}**."
+        )
+    if p1["spec"] or p2["spec"]:
+        # Surface first spec difference if available
+        s1 = p1["spec"][0] if p1["spec"] else None
+        s2 = p2["spec"][0] if p2["spec"] else None
+        if s1 and s2 and s1 != s2:
+            diffs.append(f"Key specification difference: {s1} vs {s2}")
     if not diffs:
-        diffs.append("Both are professional clinical devices. Consult the datasheets for full technical differences.")
+        diffs.append(
+            "Both are professional clinical devices. "
+            "Consult the datasheets for full technical differences."
+        )
     for d in diffs:
-        L.append(f"- {d}")
+        L.append(f"• {d}")
     L.append("")
 
-    # Recommendation
-    L.append("## Recommendation")
+    # ── Recommendation ─────────────────────────────────────────────────────
+    L.append("### Recommendation")
     L.append("")
     L.append(
         f"Choose **{p1['name']}** or **{p2['name']}** based on your clinical "
@@ -570,17 +680,16 @@ def format_category(question: str, context: list[str]) -> str:
 
     display = cat_name or "Medical"
     L: list[str] = []
-    L.append(f"# {display} Devices")
+    L.append(f"## 🏥 {display} Devices")
     L.append("")
     L.append(
         f"The **{display}** category includes specialised medical devices "
-        f"for professional clinical use. "
-        f"Below is an overview of available products."
+        f"for professional clinical use."
     )
     L.append("")
 
     if products:
-        L.append("## Products")
+        L.append("### Available Devices")
         L.append("")
         for name, desc in products:
             L.append(f"**{name}**")
@@ -588,22 +697,11 @@ def format_category(question: str, context: list[str]) -> str:
                 L.append(desc)
             L.append("")
 
-        # Applications — generic for category
-        L.append("## Applications")
+        L.append("### Applications")
         L.append("")
-        L.append(f"- Professional use in **{display}** departments")
-        L.append("- Hospitals, clinics, and diagnostic centres")
-        L.append("- Supports clinical decision-making and patient care")
-        L.append("")
-
-        # Summary table
-        L.append("## Summary")
-        L.append("")
-        L.append("| Product | Description |")
-        L.append("|---|---|")
-        for name, desc in products:
-            td = (desc[:80] + "…") if len(desc) > 80 else (desc or "—")
-            L.append(f"| {name} | {td} |")
+        L.append(f"• Professional use in **{display}** departments")
+        L.append("• Hospitals, clinics, and diagnostic centres")
+        L.append("• Supports clinical decision-making and patient care")
         L.append("")
     else:
         L.append("No device information is currently available for this category.")
@@ -614,36 +712,109 @@ def format_category(question: str, context: list[str]) -> str:
 
 def format_dynamic(question: str, context: list[str]) -> str:
     """
-    dynamic_search / wikipedia source — summarise into readable paragraphs.
-    Never dumps raw search snippets.
+    dynamic_search / wikipedia source — produces clean, structured markdown.
+
+    Output structure:
+        🌐 Web Information
+        ## Summary
+        ## Key Points        (if extractable)
+        ## Clinical Relevance (if question contains clinical keywords)
+
+    Rules:
+    - Maximum 2 short paragraphs in Summary (≤ 2 sentences each).
+    - Bullet points for Key Points and Clinical Relevance.
+    - NEVER outputs raw search snippets, URLs, titles, or website names.
+    - NEVER concatenates raw search engine output.
+    - Does NOT affect knowledge-base (FAISS) formatters.
     """
-    chunks = _split_chunks(context)
+    chunks  = _split_chunks(context)
     summary = _wiki_summary(chunks)
 
-    L: list[str] = []
-    # Derive a title from the question
-    q_clean = re.sub(r"^(what is|explain|tell me about|define)\s+", "", question.strip(), flags=re.I)
-    title = q_clean.strip().title() or "Medical Information"
-    L.append(f"# {title}")
+    # ── Derive a readable topic name from the question ─────────────────────
+    q_clean = re.sub(
+        r"^(what is|what are|explain|tell me about|define|describe|how does?|why is)\s+",
+        "", question.strip(), flags=re.I,
+    ).strip()
+    topic = q_clean.title() or "Medical Information"
+
+    L: list[str] = ["## 🌐 Web Information", ""]
+
+    if not summary:
+        L.append(
+            "Detailed web information for this query is not currently available. "
+            "Please ask about a specific Philips medical device for detailed information."
+        )
+        print(f"[refiner] format_dynamic | topic={topic!r} | no_summary")
+        return "\n".join(L).rstrip()
+
+    # ── Split summary into at most 4 sentences, group into ≤2 paragraphs ──
+    sents = re.split(r"(?<=[.!?])\s+", summary.strip())
+    sents = [s.strip() for s in sents if len(s.strip()) > 15]
+
+    # Paragraph 1: sentences 1–2
+    # Paragraph 2: sentences 3–4 (if present)
+    para1 = " ".join(sents[:2])
+    para2 = " ".join(sents[2:4]) if len(sents) > 2 else ""
+
+    L.append("### Summary")
+    L.append("")
+    L.append(para1)
+    if para2:
+        L.append("")
+        L.append(para2)
     L.append("")
 
-    if summary:
-        # Break into max 2-sentence paragraphs
-        sents = re.split(r"(?<=[.!?])\s+", summary)
-        para: list[str] = []
-        for i, s in enumerate(sents):
-            para.append(s)
-            if len(para) == 2 or i == len(sents) - 1:
-                L.append(" ".join(para))
-                L.append("")
-                para = []
-    else:
-        L.append(
-            "Detailed information for this query is not currently available. "
-            "Please ask about a specific Philips medical device for more information."
-        )
+    # ── Key Points: distil bullet-worthy facts from the summary ───────────
+    # Extract noun-phrase / clause candidates — sentences with numbers,
+    # measurement units, or defining copulas ("is", "are", "refers to").
+    kp_candidates: list[str] = []
+    for s in sents:
+        low = s.lower()
+        if any(kw in low for kw in (
+            " is ", " are ", "refers to", "used to", "measures", "records",
+            "provides", "detects", "monitors", "allows", "enables",
+        )):
+            # Shorten: trim to first clause (up to first comma or 15 words)
+            first_clause = re.split(r",|\band\b", s)[0].strip()
+            words = first_clause.split()
+            short = " ".join(words[:15]) + ("." if not first_clause.endswith(".") else "")
+            if len(short) > 20:
+                kp_candidates.append(short)
 
-    print(f"[refiner] format_dynamic | title={title!r} | summary_chars={len(summary)}")
+    if kp_candidates:
+        # Deduplicate
+        seen_kp: set[str] = set()
+        L.append("### Key Points")
+        L.append("")
+        for kp in kp_candidates[:4]:
+            key = kp.lower().strip()
+            if key not in seen_kp:
+                seen_kp.add(key)
+                L.append(f"- {kp}")
+        L.append("")
+
+    # ── Clinical Relevance: show only if question has clinical keywords ────
+    clinical_kws = (
+        "diagnos", "treat", "clinical", "hospital", "patient", "monitor",
+        "test", "procedure", "therap", "surgery", "medical", "health",
+        "condition", "disease", "symptom",
+    )
+    q_low = question.lower()
+    if any(kw in q_low for kw in clinical_kws):
+        # Pull sentences that contain clinical phrasing
+        cr_lines: list[str] = []
+        for s in sents:
+            low = s.lower()
+            if any(kw in low for kw in ("diagnos", "treat", "clinical", "hospital", "patient", "used in", "used for")):
+                cr_lines.append(s)
+        if cr_lines:
+            L.append("### Clinical Relevance")
+            L.append("")
+            for cr in cr_lines[:3]:
+                L.append(f"- {cr}")
+            L.append("")
+
+    print(f"[refiner] format_dynamic | topic={topic!r} | summary_chars={len(summary)} | kp={len(kp_candidates)}")
     return "\n".join(L).rstrip()
 
 
@@ -945,14 +1116,65 @@ _CONCEPTS: dict[str, dict] = {
         ],
         "products": [],
     },
+    "blood pressure monitor": {
+        "name": "Blood Pressure Monitor",
+        "summary": "A blood pressure monitor measures the force of blood against artery walls, recording systolic (peak) and diastolic (resting) pressure values used to assess cardiovascular health.",
+        "key_points": [
+            "Records systolic and diastolic blood pressure values",
+            "Available as clinic, home, and ambulatory (24-hour) devices",
+            "Non-invasive measurement via an inflatable cuff",
+            "Ambulatory monitors record repeatedly over 24 hours during normal activity",
+        ],
+        "uses": [
+            "Diagnosing and monitoring hypertension",
+            "Detecting white-coat and masked hypertension",
+            "Cardiovascular risk stratification",
+            "Monitoring response to antihypertensive therapy",
+        ],
+        "benefits": [
+            "Non-invasive and easy to use",
+            "Ambulatory devices capture diurnal variation missed by single readings",
+            "Immediate results with no laboratory analysis required",
+            "Portable models available for home and ambulatory monitoring",
+        ],
+        "products": ["Oscar 2 Ambulatory Blood Pressure Monitor"],
+    },
+    "blood pressure": {
+        "name": "Blood Pressure",
+        "summary": "Blood pressure is the force exerted by circulating blood against the walls of blood vessels, expressed as systolic pressure over diastolic pressure (e.g. 120/80 mmHg).",
+        "key_points": [
+            "Measured in millimetres of mercury (mmHg)",
+            "Normal range: systolic < 120 mmHg, diastolic < 80 mmHg",
+            "Elevated blood pressure (hypertension) increases risk of heart disease and stroke",
+            "Measured non-invasively with a sphygmomanometer or automated cuff device",
+        ],
+        "uses": [
+            "Screening for hypertension in routine health check-ups",
+            "Monitoring cardiovascular disease risk",
+            "Guiding antihypertensive medication dosing",
+            "Pre-operative and peri-operative patient assessment",
+        ],
+        "benefits": [
+            "Simple, fast, and non-invasive measurement",
+            "Early identification of hypertension reduces cardiovascular events",
+            "Home monitoring empowers patient self-management",
+            "24-hour ambulatory monitoring provides the most accurate profile",
+        ],
+        "products": ["Oscar 2 Ambulatory Blood Pressure Monitor"],
+    },
 }
 
 
 
 def format_general_medical(question: str, context: list[str]) -> str:
     """
-    general_medical_query — definition, key points, uses, benefits,
-    related products.  Uses built-in knowledge base + Wikipedia enrichment.
+    general_medical_query — spec format:
+        🏥 Medical Concept
+        What it is   (definition / summary)
+        Purpose      (key points)
+        Clinical Use (uses)
+        Related Devices
+    Uses built-in knowledge base + Wikipedia enrichment.
     Never dumps raw snippets.
     """
     q = question.lower()
@@ -970,54 +1192,54 @@ def format_general_medical(question: str, context: list[str]) -> str:
     L: list[str] = []
 
     if concept:
-        L.append(f"# {concept['name']}")
+        L.append(f"## 🏥 {concept['name']}")
         L.append("")
 
-        # Summary — prefer Wikipedia if it is richer
+        # What it is — prefer Wikipedia if richer
+        L.append("### What it is")
+        L.append("")
         if wiki and len(wiki) > len(concept["summary"]):
             L.append(wiki)
         else:
             L.append(concept["summary"])
         L.append("")
 
-        # Key Points
+        # Purpose — key points
         if concept.get("key_points"):
-            L.append("## Key Points")
+            L.append("### Purpose")
             L.append("")
             for kp in concept["key_points"]:
-                L.append(f"- {kp}")
+                L.append(f"• {kp}")
             L.append("")
 
-        # Common Uses
+        # Clinical Use
         if concept.get("uses"):
-            L.append("## Common Uses")
+            L.append("### Clinical Use")
             L.append("")
             for u in concept["uses"]:
-                L.append(f"- {u}")
+                L.append(f"• {u}")
             L.append("")
 
-        # Benefits
-        if concept.get("benefits"):
-            L.append("## Benefits")
-            L.append("")
-            for b in concept["benefits"]:
-                L.append(f"- {b}")
-            L.append("")
-
-        # Related products
+        # Related Devices
         if concept.get("products"):
-            L.append("## Related Philips Products")
+            L.append("### Related Devices")
             L.append("")
             for p in concept["products"]:
-                L.append(f"- **{p}**")
+                L.append(f"• **{p}**")
             L.append("")
 
     elif wiki:
-        # Unknown concept but Wikipedia content is available
-        q_clean = re.sub(r"^(what is|explain|tell me about|define)\s+", "", q).strip().title()
-        L.append(f"# {q_clean or 'Medical Information'}")
+        # Unknown concept — derive title from query, use wiki prose
+        q_clean = re.sub(
+            r"^(what is|what are|explain|tell me about|define|describe)\s+",
+            "", q, flags=re.I,
+        ).strip().title()
+        L.append(f"## 🏥 {q_clean or 'Medical Information'}")
         L.append("")
-        # Break wiki text into ≤2-sentence paragraphs
+
+        L.append("### What it is")
+        L.append("")
+        # Emit up to 2-sentence paragraphs
         sents = re.split(r"(?<=[.!?])\s+", wiki)
         para: list[str] = []
         for i, s in enumerate(sents):
@@ -1027,7 +1249,7 @@ def format_general_medical(question: str, context: list[str]) -> str:
                 L.append("")
                 para = []
     else:
-        L.append("# Medical Information")
+        L.append("## 🏥 Medical Information")
         L.append("")
         L.append(
             "This query relates to a medical concept or device technology. "

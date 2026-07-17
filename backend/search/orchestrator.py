@@ -193,7 +193,44 @@ def smart_search(query: str, intent: str = "product_query") -> SearchResult:
             f"| confidence={result.confidence} "
             f"| chunks={len(result.chunks)}"
         )
-        return result
+
+        # ── Confidence gate ────────────────────────────────────────────────
+        # When FAISS returns a product with low confidence AND that product
+        # name does not appear anywhere in the original user query, the match
+        # is likely wrong (e.g. "Tell me about Infusion Pump" → DFM100).
+        # Fall through to dynamic search so the user gets a correct general
+        # answer instead of a confidently-wrong product page.
+        #
+        # Gate condition (all must be true):
+        #   1. confidence < 0.97  (strong exact matches are exempt)
+        #   2. matched_product is set (None would already have fallen through)
+        #   3. matched_product name does NOT appear in the original query
+        #      (if the user literally typed the product name, trust the match)
+        _LOW_CONF_THRESHOLD = 0.97
+        if (
+            result.matched_product
+            and result.confidence < _LOW_CONF_THRESHOLD
+        ):
+            _q_lower = query.lower()
+            # Check if any significant token of the product name is in the query
+            _product_tokens = [
+                t.lower() for t in result.matched_product.split()
+                if len(t) > 2 and t.lower() not in ("the", "for", "and")
+            ]
+            _product_in_query = any(tok in _q_lower for tok in _product_tokens)
+
+            if not _product_in_query:
+                print(
+                    f"[search] CONFIDENCE GATE TRIGGERED | "
+                    f"product={result.matched_product!r} not in query={query!r} | "
+                    f"confidence={result.confidence} < {_LOW_CONF_THRESHOLD} | "
+                    f"falling through to dynamic search"
+                )
+                result = None   # drop the low-confidence wrong match
+        # ──────────────────────────────────────────────────────────────────
+
+        if result:
+            return result
 
     # ── 4. Dynamic search fallback ─────────────────────────────────────────
     # Guard: only execute dynamic search when the query is clearly medical /

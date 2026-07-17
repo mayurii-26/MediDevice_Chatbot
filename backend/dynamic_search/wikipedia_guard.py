@@ -113,12 +113,13 @@ _MEDICAL_KEYWORDS: list[str] = [
     "intubation", "laryngoscopy",
     "oximetry", "pulse oximeter", "spo2",
     "ambulatory blood pressure", "abpm",
-    "cpap", "ventilation", "ventilator",
-    "stress testing", "holter",
+    "cpap", "bubble cpap", "ventilation", "ventilator",
+    "stress testing", "holter", "holter monitor",
     "anaesthesia", "anesthesia",
     "neonatal", "radiant warmer",
     "infusion pump", "syringe pump",
     "patient monitoring",
+    "surgery lights", "surgical lights", "operating theatre lights",
 ]
 
 

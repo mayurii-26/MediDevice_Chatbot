@@ -32,9 +32,14 @@ class ChatResponse(BaseModel):
 
 
 class ContactRequest(BaseModel):
-    name: str
-    email: str
-    message: str
+    name:            str
+    email:           str
+    message:         str
+    phone:           Optional[str] = ""
+    hospital:        Optional[str] = ""
+    reason:          Optional[str] = "General Inquiry"
+    address:         Optional[str] = ""
+    submission_type: Optional[str] = "General Support"
 
 
 class ContactResponse(BaseModel):

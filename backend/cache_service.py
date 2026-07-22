@@ -233,26 +233,52 @@ def _semantic_lookup(question: str, intent: str) -> str | None:
             .execute()
         )
     except Exception as e:
-        print(f"[CACHE] DB error during lookup: {e}")
-        return None
+        # 'version' column may not exist yet — retry without it
+        if "version" in str(e):
+            print(f"[CACHE] version column missing — retrying without version filter")
+            try:
+                result = (
+                    supabase.table("cached_answers")
+                    .select("question, answer, embedding")
+                    .like("question", f"{intent_prefix}%")
+                    .execute()
+                )
+            except Exception as e2:
+                print(f"[CACHE] DB error during lookup: {e2}")
+                return None
+        else:
+            print(f"[CACHE] DB error during lookup: {e}")
+            return None
 
     rows = result.data or []
     if not rows:
         return None
 
     # ── Filter: only accept rows with the current CACHE_VERSION ──────────
-    # Rows without a version column (NULL) are treated as version 1
-    # and are rejected when CACHE_VERSION > 1.
-    versioned_rows = [
-        r for r in rows
-        if (r.get("version") or 1) == CACHE_VERSION
-    ]
+    # If 'version' column doesn't exist in the DB, all rows lack it —
+    # treat them as version 1.  When CACHE_VERSION == 1, all rows pass.
+    # When CACHE_VERSION > 1, rows without a version field are rejected
+    # (stale entries) but this does NOT crash the service.
+    has_version_column = "version" in (rows[0] if rows else {})
 
-    skipped_old = len(rows) - len(versioned_rows)
-    if skipped_old:
+    if has_version_column:
+        versioned_rows = [
+            r for r in rows
+            if (r.get("version") or 1) == CACHE_VERSION
+        ]
+        skipped_old = len(rows) - len(versioned_rows)
+        if skipped_old:
+            print(
+                f"[CACHE] skipped {skipped_old} row(s) with version < {CACHE_VERSION} "
+                f"(stale cache entries — not deleted)"
+            )
+    else:
+        # version column not yet added — use all rows (treat as unversioned)
+        versioned_rows = rows
         print(
-            f"[CACHE] skipped {skipped_old} row(s) with version < {CACHE_VERSION} "
-            f"(stale cache entries — not deleted)"
+            f"[CACHE] version column not present in cached_answers — "
+            f"using all {len(rows)} row(s) unfiltered. "
+            f"Run: ALTER TABLE cached_answers ADD COLUMN IF NOT EXISTS version integer;"
         )
 
     if not versioned_rows:
@@ -406,16 +432,27 @@ def save_cached_answer(question: str, answer: str, intent: str = "product_query"
 
     # Duplicate check — skip if an entry with the same key AND version exists
     try:
-        existing = (
-            supabase.table("cached_answers")
-            .select("question, version")
-            .eq("question", key)
-            .eq("version", CACHE_VERSION)
-            .limit(1)
-            .execute()
-        )
+        # Try with version column first; fall back gracefully if it doesn't exist
+        try:
+            existing = (
+                supabase.table("cached_answers")
+                .select("question, version")
+                .eq("question", key)
+                .eq("version", CACHE_VERSION)
+                .limit(1)
+                .execute()
+            )
+        except Exception:
+            # version column missing — check by question only
+            existing = (
+                supabase.table("cached_answers")
+                .select("question")
+                .eq("question", key)
+                .limit(1)
+                .execute()
+            )
         if existing.data:
-            print(f"[CACHE] already stored (v{CACHE_VERSION}) — no-op | key={key}")
+            print(f"[CACHE] already stored — no-op | key={key}")
             return
     except Exception as dup_err:
         print(f"[CACHE] duplicate check error (proceeding): {dup_err}")
@@ -423,25 +460,49 @@ def save_cached_answer(question: str, answer: str, intent: str = "product_query"
     # Try to store with embedding + version
     try:
         vec = _embed(question).tolist()
-        supabase.table("cached_answers").insert({
-            "question":  key,
-            "answer":    answer,
-            "embedding": vec,
-            "version":   CACHE_VERSION,
-        }).execute()
-        print(f"[CACHE] STORED (v{CACHE_VERSION}, with embedding) | key={key}")
+        try:
+            supabase.table("cached_answers").insert({
+                "question":  key,
+                "answer":    answer,
+                "embedding": vec,
+                "version":   CACHE_VERSION,
+            }).execute()
+            print(f"[CACHE] STORED (v{CACHE_VERSION}, with embedding) | key={key}")
+        except Exception as ver_err:
+            if "version" in str(ver_err):
+                # version column doesn't exist — insert without it
+                supabase.table("cached_answers").insert({
+                    "question":  key,
+                    "answer":    answer,
+                    "embedding": vec,
+                }).execute()
+                print(f"[CACHE] STORED (no version col, with embedding) | key={key}")
+            else:
+                raise
     except Exception:
         # Embedding column might not exist yet — try without it
         try:
-            supabase.table("cached_answers").insert({
-                "question": key,
-                "answer":   answer,
-                "version":  CACHE_VERSION,
-            }).execute()
-            print(f"[CACHE] STORED (v{CACHE_VERSION}, no embedding column) | key={key}")
-            print(
-                "[CACHE] MIGRATION NEEDED: "
-                "ALTER TABLE cached_answers ADD COLUMN IF NOT EXISTS embedding vector(384);"
-            )
+            try:
+                supabase.table("cached_answers").insert({
+                    "question": key,
+                    "answer":   answer,
+                    "version":  CACHE_VERSION,
+                }).execute()
+                print(f"[CACHE] STORED (v{CACHE_VERSION}, no embedding column) | key={key}")
+            except Exception as ver_err2:
+                if "version" in str(ver_err2):
+                    # Neither embedding nor version column — bare insert
+                    supabase.table("cached_answers").insert({
+                        "question": key,
+                        "answer":   answer,
+                    }).execute()
+                    print(f"[CACHE] STORED (bare, no version/embedding cols) | key={key}")
+                    print(
+                        "[CACHE] MIGRATION NEEDED: "
+                        "ALTER TABLE cached_answers ADD COLUMN IF NOT EXISTS version integer; "
+                        "ALTER TABLE cached_answers ADD COLUMN IF NOT EXISTS embedding vector(384);"
+                    )
+                else:
+                    raise
         except Exception as e2:
             print(f"[CACHE] insert failed: {e2}")

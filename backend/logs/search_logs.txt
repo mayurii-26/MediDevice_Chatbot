@@ -112,3 +112,25 @@
 [2026-07-18 00:06:38] SOURCE=faiss | CONFIDENCE=0.95 | PRODUCT=Trilogy EV300 Hospital Ventilator | CATEGORY=PatientMonitoring | QUESTION=What are the specifications of Neonatal Ventilator?
 [2026-07-18 00:08:00] SOURCE=faiss | CONFIDENCE=0.95 | PRODUCT=Trilogy EV300 Hospital Ventilator | CATEGORY=PatientMonitoring | QUESTION=What are the features of Neonatal Ventilator?
 [2026-07-18 00:08:50] SOURCE=faiss | CONFIDENCE=0.97 | PRODUCT=E-Flo 6C Anaesthesia Workstation | CATEGORY=Anaesthesia | QUESTION=What is an Anaesthesia Workstation?
+[2026-07-18 11:52:25] SOURCE=faiss | CONFIDENCE=1.00 | PRODUCT=PageWriter TC50 | CATEGORY=Cardiology | QUESTION=What are the features of PageWriter TC50?
+[2026-07-18 11:53:55] SOURCE=faiss | CONFIDENCE=0.90 | PRODUCT=Cardiac Workstation 7000 vs ST80i Stress Testing System | CATEGORY=PatientMonitoring | QUESTION=Compare ECG machine and stress test system.
+[2026-07-18 11:56:11] SOURCE=faiss | CONFIDENCE=0.95 | PRODUCT=Trilogy EV300 Hospital Ventilator | CATEGORY=PatientMonitoring | QUESTION=How can i install a ventilator machine?
+[2026-07-21 21:25:00] SOURCE=wikipedia | CONFIDENCE=0.74 | PRODUCT=N/A | CATEGORY=PatientMonitoring | QUESTION=Tell me about Infusion Pumps
+[2026-07-21 21:25:36] SOURCE=faiss | CONFIDENCE=0.90 | PRODUCT=Trilogy EV300 Hospital Ventilator vs Cardiac Workstation 7000 | CATEGORY=PatientMonitoring | QUESTION=Compare ventilators and patient monitors.
+[2026-07-21 21:27:09] SOURCE=wikipedia | CONFIDENCE=0.73 | PRODUCT=N/A | CATEGORY=Cardiology | QUESTION=Tell me about Ambulatory Blood Pressure (ABPM)
+[2026-07-21 21:28:41] SOURCE=faiss | CONFIDENCE=0.95 | PRODUCT=Trilogy EV300 Hospital Ventilator | CATEGORY=PatientMonitoring | QUESTION=What are the specifications of Neonatal Ventilator?
+[2026-07-21 21:29:26] SOURCE=dynamic_search | CONFIDENCE=0.76 | PRODUCT=N/A | CATEGORY=MotherChildCare | QUESTION=What are the specifications of Bubble CPAP System?
+[2026-07-22 18:54:48] SOURCE=dynamic_search | CONFIDENCE=0.73 | PRODUCT=N/A | CATEGORY=PatientMonitoring | QUESTION=Tell me about Patient Monitoring Devices
+[2026-07-22 18:55:32] SOURCE=dynamic_search | CONFIDENCE=0.75 | PRODUCT=N/A | CATEGORY=PatientMonitoring | QUESTION=Difference between syringe pump and infusion pump?
+[2026-07-22 18:59:59] SOURCE=faiss | CONFIDENCE=1.00 | PRODUCT=PageWriter TC50 | CATEGORY=Cardiology | QUESTION=Compare PageWriter TC50 and TC70.
+[2026-07-22 19:00:43] SOURCE=wikipedia | CONFIDENCE=0.76 | PRODUCT=N/A | CATEGORY=Cardiology | QUESTION=Tell me about Ambulatory Blood Pressure (ABPM)
+[2026-07-22 19:06:39] SOURCE=dynamic_search | CONFIDENCE=0.71 | PRODUCT=N/A | CATEGORY=PatientMonitoring | QUESTION=Difference between syringe pump and infusion pump?
+[2026-07-22 19:07:29] SOURCE=wikipedia | CONFIDENCE=0.76 | PRODUCT=N/A | CATEGORY=Cardiology | QUESTION=Tell me about Ambulatory Blood Pressure (ABPM)
+[2026-07-22 19:09:30] SOURCE=faiss | CONFIDENCE=1.00 | PRODUCT=Oscar 2 Ambulatory Blood Pressure Monitor | CATEGORY=Cardiology | QUESTION=Tell me about Oscar 2 Ambulatory Blood Pressure Monitor
+[2026-07-22 19:11:26] SOURCE=dynamic_search | CONFIDENCE=0.77 | PRODUCT=N/A | CATEGORY=Unknown | QUESTION=What are the medical devices you provide?
+[2026-07-22 20:48:10] SOURCE=faiss | CONFIDENCE=0.99 | PRODUCT=HeartStart FRx AED | CATEGORY=PatientMonitoring | QUESTION=Tell me about HeartStart FRx AED
+[2026-07-22 20:55:10] SOURCE=dynamic_search | CONFIDENCE=0.82 | PRODUCT=N/A | CATEGORY=Unknown | QUESTION=what devices category you have
+[2026-07-22 21:44:10] SOURCE=dynamic_search | CONFIDENCE=0.72 | PRODUCT=N/A | CATEGORY=Cardiology | QUESTION=Tell me about Holter monitoring procedure
+[2026-07-22 22:49:10] SOURCE=faiss | CONFIDENCE=0.95 | PRODUCT=Trilogy EV300 Hospital Ventilator | CATEGORY=PatientMonitoring | QUESTION=How often should a ventilator be serviced?
+[2026-07-22 22:50:35] SOURCE=dynamic_search | CONFIDENCE=0.83 | PRODUCT=N/A | CATEGORY=Unknown | QUESTION=What equipment is used in ICU?
+[2026-07-22 22:51:47] SOURCE=wikipedia | CONFIDENCE=0.80 | PRODUCT=N/A | CATEGORY=PatientMonitoring | QUESTION=How does a defibrillator work?

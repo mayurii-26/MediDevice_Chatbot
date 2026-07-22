@@ -2,6 +2,7 @@ import { useState, forwardRef } from "react";
 import axios from "axios";
 
 const ContactForm = forwardRef(function ContactForm(props, ref) {
+  const { reason, submissionType } = props; // Accept reason and submission_type from parent
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
@@ -22,6 +23,8 @@ const ContactForm = forwardRef(function ContactForm(props, ref) {
         name,
         email,
         message,
+        reason: reason || "General Inquiry",
+        submission_type: submissionType || "General Support",
       });
 
       setStatus("success");

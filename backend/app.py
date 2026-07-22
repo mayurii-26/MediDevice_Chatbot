@@ -31,6 +31,18 @@ from chat_history import (
 )
 from database.supabase_client import supabase
 
+# ── Admin portal (completely separate auth — no changes to user auth) ───────
+from admin import admin_router
+
+# ── Analytics logging (non-fatal, fire-and-forget) ──────────────────────────
+from admin.analytics_logger import (
+    log_query,
+    log_product_search,
+    log_comparison,
+    log_specification,
+    log_unanswered_query,
+)
+
 app = FastAPI(title="MediDevice Chatbot API")
 
 app.add_middleware(
@@ -40,6 +52,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Register admin routes — prefix /admin, independent JWT auth
+app.include_router(admin_router)
 
 _FALLBACK = (
     "I am a medical device assistant trained on medical device knowledge. "
@@ -386,6 +401,16 @@ def chat(req: ChatRequest, authorization: str | None = Header(default=None)):
             )
             if conversation_id:
                 save_message(conversation_id, "assistant", _oos_reply)
+            # Log healthcare queries that were out-of-scope (non-fatal)
+            _is_guest = authenticated_user_id is None
+            log_unanswered_query(
+                question=req.question,
+                answer_source="out_of_scope",
+                user_id=authenticated_user_id,
+                is_guest=_is_guest,
+                confidence=0.0,
+                matched_product=None,
+            )
             return ChatResponse(
                 answer=_oos_reply,
                 source="out_of_scope",
@@ -449,6 +474,16 @@ def chat(req: ChatRequest, authorization: str | None = Header(default=None)):
             )
             if conversation_id:
                 save_message(conversation_id, "assistant", _oos_reply)
+            # Log healthcare queries that were out-of-scope (non-fatal)
+            _is_guest = authenticated_user_id is None
+            log_unanswered_query(
+                question=req.question,
+                answer_source="out_of_scope",
+                user_id=authenticated_user_id,
+                is_guest=_is_guest,
+                confidence=0.0,
+                matched_product=None,
+            )
             return ChatResponse(
                 answer=_oos_reply,
                 source="out_of_scope",
@@ -532,6 +567,44 @@ def chat(req: ChatRequest, authorization: str | None = Header(default=None)):
             confidence=result.confidence,
         )
 
+        # ── Analytics logging (non-fatal, after response is built) ────────
+        _is_guest = authenticated_user_id is None
+        log_query(
+            question=req.question,
+            intent=intent,
+            answer_source=result.source,
+            conversation_id=conversation_id,
+            user_id=authenticated_user_id,
+            is_guest=_is_guest,
+            confidence=result.confidence,
+            matched_product=result.matched_product,
+            matched_category=result.matched_category,
+        )
+        if result.matched_product and result.matched_product not in ("N/A", ""):
+            log_product_search(product_name=result.matched_product)
+        if intent == "comparison_query" and result.matched_product:
+            log_comparison(
+                products_compared=result.matched_product,
+                user_id=authenticated_user_id,
+                conversation_id=conversation_id,
+            )
+        if intent == "specification_query" and result.matched_product:
+            log_specification(
+                product_name=result.matched_product,
+                user_id=authenticated_user_id,
+                conversation_id=conversation_id,
+            )
+        # Log healthcare queries that went unanswered (fallback / low-confidence only)
+        log_unanswered_query(
+            question=req.question,
+            answer_source=result.source,
+            user_id=authenticated_user_id,
+            is_guest=_is_guest,
+            confidence=result.confidence,
+            matched_product=result.matched_product,
+        )
+        # ─────────────────────────────────────────────────────────────────
+
         documents = []
         if result.matched_product:
             try:
@@ -566,6 +639,14 @@ def chat(req: ChatRequest, authorization: str | None = Header(default=None)):
     except Exception as e:
         print(f"[PIPELINE] ERROR: {type(e).__name__}: {e}")
         log_search(question=req.question, source="fallback")
+        log_unanswered_query(
+            question=req.question,
+            answer_source="fallback",
+            user_id=None,
+            is_guest=True,
+            confidence=0.0,
+            matched_product=None,
+        )
         if conversation_id:
             save_message(conversation_id, "assistant", _FALLBACK)
         return ChatResponse(
@@ -704,6 +785,16 @@ async def chat_stream(req: ChatRequest, authorization: str | None = Header(defau
                 )
                 if conversation_id:
                     save_message(conversation_id, "assistant", _oos_reply)
+                # Log healthcare queries that were out-of-scope (non-fatal)
+                _is_guest_oos = authenticated_user_id is None
+                log_unanswered_query(
+                    question=req.question,
+                    answer_source="out_of_scope",
+                    user_id=authenticated_user_id,
+                    is_guest=_is_guest_oos,
+                    confidence=0.0,
+                    matched_product=None,
+                )
                 chunk_size = 40
                 for i in range(0, len(_oos_reply), chunk_size):
                     yield f"data: {_oos_reply[i:i+chunk_size]}\n\n"
@@ -774,6 +865,16 @@ async def chat_stream(req: ChatRequest, authorization: str | None = Header(defau
                 )
                 if conversation_id:
                     save_message(conversation_id, "assistant", _oos_reply)
+                # Log healthcare queries that were out-of-scope (non-fatal)
+                _is_guest_oos_s = authenticated_user_id is None
+                log_unanswered_query(
+                    question=req.question,
+                    answer_source="out_of_scope",
+                    user_id=authenticated_user_id,
+                    is_guest=_is_guest_oos_s,
+                    confidence=0.0,
+                    matched_product=None,
+                )
                 chunk_size = 40
                 for i in range(0, len(_oos_reply), chunk_size):
                     yield f"data: {_oos_reply[i:i+chunk_size]}\n\n"
@@ -877,6 +978,44 @@ async def chat_stream(req: ChatRequest, authorization: str | None = Header(defau
                 confidence=result.confidence,
             )
 
+            # ── Analytics logging (non-fatal, after response is built) ────
+            _is_guest_stream = authenticated_user_id is None
+            log_query(
+                question=req.question,
+                intent=intent,
+                answer_source=result.source,
+                conversation_id=conversation_id,
+                user_id=authenticated_user_id,
+                is_guest=_is_guest_stream,
+                confidence=result.confidence,
+                matched_product=result.matched_product,
+                matched_category=result.matched_category,
+            )
+            if result.matched_product and result.matched_product not in ("N/A", ""):
+                log_product_search(product_name=result.matched_product)
+            if intent == "comparison_query" and result.matched_product:
+                log_comparison(
+                    products_compared=result.matched_product,
+                    user_id=authenticated_user_id,
+                    conversation_id=conversation_id,
+                )
+            if intent == "specification_query" and result.matched_product:
+                log_specification(
+                    product_name=result.matched_product,
+                    user_id=authenticated_user_id,
+                    conversation_id=conversation_id,
+                )
+            # Log healthcare queries that went unanswered (fallback / low-confidence only)
+            log_unanswered_query(
+                question=req.question,
+                answer_source=result.source,
+                user_id=authenticated_user_id,
+                is_guest=_is_guest_stream,
+                confidence=result.confidence,
+                matched_product=result.matched_product,
+            )
+            # ─────────────────────────────────────────────────────────────
+
             _print_stream_pipeline_report()
 
             meta = {
@@ -932,6 +1071,25 @@ def conversation(conversation_id: str, authorization: str | None = Header(defaul
 
 @app.post("/contact", response_model=ContactResponse)
 def contact(request: ContactRequest):
+    # ── Persist to contact_requests table (non-fatal if table doesn't exist yet) ──
+    try:
+        supabase.table("contact_requests").insert({
+            "name":            request.name.strip(),
+            "email":           request.email.strip().lower(),
+            "phone":           (request.phone or "").strip(),
+            "hospital":        (request.hospital or "").strip(),
+            "message":         request.message.strip(),
+            "reason":          (request.reason or "General Inquiry").strip(),
+            "address":         (request.address or "").strip(),
+            "submission_type": (request.submission_type or "General Support").strip(),
+            "status":          "Pending",
+        }).execute()
+        print(f"[contact] saved to DB | email={request.email} | type={request.submission_type}")
+    except Exception as db_err:
+        # Don't fail the whole request if table not yet migrated
+        print(f"[contact] DB save skipped (run migration?): {type(db_err).__name__}: {db_err}")
+
+    # ── Send email notification ────────────────────────────────────────────
     try:
         send_email(request.name, request.email, request.message)
         return ContactResponse(message="Email sent successfully")

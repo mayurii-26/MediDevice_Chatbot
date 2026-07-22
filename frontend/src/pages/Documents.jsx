@@ -148,9 +148,10 @@ function Documents() {
           <div className="doc-modal" onClick={e => e.stopPropagation()}>
             <button className="doc-modal-close" onClick={() => setPdfUrl(null)}>✕</button>
             <iframe
-              src={pdfUrl}
+              src={`https://docs.google.com/viewer?embedded=true&url=${encodeURIComponent(pdfUrl)}`}
               title="PDF Viewer"
               className="doc-modal-iframe"
+              sandbox="allow-scripts allow-same-origin"
             />
           </div>
         </div>

@@ -52,7 +52,7 @@ function PdfModal({ url, onClose }) {
               cursor: "pointer", fontSize: "1rem", color: "#374151",
               display: "flex", alignItems: "center", justifyContent: "center",
               zIndex: 10, fontWeight: 700 }}>✕</button>
-            <iframe src={url} title="PDF Viewer" style={{ flex: 1, border: "none" }} />
+            <iframe src={`https://docs.google.com/viewer?embedded=true&url=${encodeURIComponent(url)}`} title="PDF Viewer" style={{ flex: 1, border: "none" }} sandbox="allow-scripts allow-same-origin" />
           </motion.div>
         </motion.div>
       )}

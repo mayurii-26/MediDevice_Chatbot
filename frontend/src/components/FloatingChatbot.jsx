@@ -153,12 +153,20 @@ function useUserPreferences(user, authHeaders) {
 }
 
 // ── ContactFormInline (for purchase intent) ──────────────────────────────
-function ContactFormInline() {
+function ContactFormInline({ contactFormType = "general" }) {
   const [name, setName]     = useState("");
   const [email, setEmail]   = useState("");
   const [message, setMessage] = useState("");
   const [status, setStatus] = useState(null); // "success" | "error" | "fill"
   const [submitting, setSubmitting] = useState(false);
+
+  // Determine reason and submission_type based on which form was opened
+  const _typeMap = {
+    pricing: { reason: "Pricing / Purchase", submission_type: "Pricing Inquiry" },
+    sample:  { reason: "Sample Report",      submission_type: "Sample Report Request" },
+    general: { reason: "General Support",    submission_type: "General Inquiry" },
+  };
+  const { reason, submission_type } = _typeMap[contactFormType] || _typeMap.general;
 
   const submitForm = async () => {
     if (!name.trim() || !email.trim() || !message.trim()) {
@@ -171,7 +179,13 @@ function ContactFormInline() {
 
     try {
       const { default: axios } = await import("axios");
-      await axios.post(`${API_BASE_URL}/contact`, { name, email, message });
+      await axios.post(`${API_BASE_URL}/contact`, {
+        name,
+        email,
+        message,
+        reason,
+        submission_type,
+      });
 
       setStatus("success");
       setName("");
@@ -297,6 +311,7 @@ function ChatWidget({ onClose, onMinimize }) {
   const [copiedIndex, setCopiedIndex]     = useState(null);
   const [feedbackIndex, setFeedbackIndex] = useState({}); // {idx: "like"|"dislike"}
   const [showContactForm, setShowContactForm] = useState(false); // purchase intent popup
+  const [contactFormType, setContactFormType] = useState("general"); // "pricing" | "sample" | "general"
   const guestMessagesRef                  = useRef([]);
   const messagesEndRef                    = useRef(null);
   const abortControllerRef               = useRef(null);
@@ -768,7 +783,7 @@ function ChatWidget({ onClose, onMinimize }) {
               {msg.type === "bot" && msg.isPurchaseIntent && (
                 <div style={{ marginTop: 10 }}>
                   <button
-                    onClick={() => setShowContactForm(true)}
+                    onClick={() => { setContactFormType("pricing"); setShowContactForm(true); }}
                     style={{
                       display: "inline-flex",
                       alignItems: "center",
@@ -803,7 +818,7 @@ function ChatWidget({ onClose, onMinimize }) {
               {msg.type === "bot" && msg.isSampleReportIntent && (
                 <div style={{ marginTop: 10 }}>
                   <button
-                    onClick={() => setShowContactForm(true)}
+                    onClick={() => { setContactFormType("sample"); setShowContactForm(true); }}
                     style={{
                       display: "inline-flex",
                       alignItems: "center",
@@ -838,7 +853,7 @@ function ChatWidget({ onClose, onMinimize }) {
               {msg.type === "bot" && msg.isOutOfScope && (
                 <div style={{ marginTop: 10 }}>
                   <button
-                    onClick={() => setShowContactForm(true)}
+                    onClick={() => { setContactFormType("general"); setShowContactForm(true); }}
                     style={{
                       display: "inline-flex",
                       alignItems: "center",
@@ -1076,7 +1091,7 @@ function ChatWidget({ onClose, onMinimize }) {
 
               {/* Scrollable form body */}
               <div style={{ overflowY: "auto", padding: "18px 16px 20px", flex: 1 }}>
-                <ContactFormInline />
+                <ContactFormInline contactFormType={contactFormType} />
               </div>
             </motion.div>
           </motion.div>
@@ -1153,7 +1168,7 @@ function ChatWidget({ onClose, onMinimize }) {
               cursor: "pointer", fontWeight: 700, color: "#374151",
               display: "flex", alignItems: "center", justifyContent: "center", zIndex: 11,
             }}>✕</button>
-            <iframe src={pdfUrl} title="PDF" style={{ flex: 1, border: "none" }} />
+            <iframe src={`https://docs.google.com/viewer?embedded=true&url=${encodeURIComponent(pdfUrl)}`} title="PDF" style={{ flex: 1, border: "none" }} sandbox="allow-scripts allow-same-origin" />
           </div>
         </div>
       )}

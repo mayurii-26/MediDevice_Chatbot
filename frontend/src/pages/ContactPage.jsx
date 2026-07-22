@@ -17,7 +17,11 @@ export default function ContactPage() {
     e.preventDefault();
     setSending(true); setStatus(null);
     try {
-      await axios.post(`${API}/contact`, form);
+      await axios.post(`${API}/contact`, {
+        ...form,
+        reason: "General Support",
+        submission_type: "General Inquiry",
+      });
       setStatus("ok");
       setForm({ name: "", email: "", message: "" });
     } catch {

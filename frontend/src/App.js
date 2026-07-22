@@ -4,6 +4,24 @@ import { useEffect, useState } from "react";
 // Auth context
 import { AuthProvider } from "./context/AuthContext";
 
+// ── Admin portal (completely separate from user auth) ────────────────────
+import { AdminAuthProvider }     from "./admin/context/AdminAuthContext";
+import AdminProtectedRoute       from "./admin/components/AdminProtectedRoute";
+import AdminLayout               from "./admin/components/AdminLayout";
+import AdminLogin                from "./admin/pages/AdminLogin";
+import AdminDashboard            from "./admin/pages/AdminDashboard";
+import AdminUsers                from "./admin/pages/AdminUsers";
+import AdminQueryAnalytics       from "./admin/pages/AdminQueryAnalytics";
+import AdminProducts             from "./admin/pages/AdminProducts";
+import AdminDocuments            from "./admin/pages/AdminDocuments";
+import AdminDownloads            from "./admin/pages/AdminDownloads";
+import AdminContactRequests      from "./admin/pages/AdminContactRequests";
+import AdminUnknownQueries       from "./admin/pages/AdminUnknownQueries";
+import AdminConversations        from "./admin/pages/AdminConversations";
+import AdminAIAnalytics          from "./admin/pages/AdminAIAnalytics";
+import AdminSystemHealth         from "./admin/pages/AdminSystemHealth";
+import AdminSettings             from "./admin/pages/AdminSettings";
+
 // Auth pages (unchanged)
 import Login    from "./pages/Login";
 import Register from "./pages/Register";
@@ -72,27 +90,56 @@ function WebsiteLayout({ children }) {
 function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
-        {/* Session timeout — only affects logged-in users; guests are excluded */}
-        <SessionTimeoutHandler />
-        <Routes>
-          {/* Public website pages */}
-          <Route path="/" element={<WebsiteLayout><Home /></WebsiteLayout>} />
-          <Route path="/about" element={<WebsiteLayout><About /></WebsiteLayout>} />
-          <Route path="/products" element={<WebsiteLayout><ProductsPage /></WebsiteLayout>} />
-          <Route path="/services" element={<WebsiteLayout><ServicesPage /></WebsiteLayout>} />
-          <Route path="/resources" element={<WebsiteLayout><ResourcesPage /></WebsiteLayout>} />
-          <Route path="/contact" element={<WebsiteLayout><ContactPage /></WebsiteLayout>} />
+      {/* Admin portal gets its own independent auth context — no overlap with user auth */}
+      <AdminAuthProvider>
+        <BrowserRouter>
+          {/* Session timeout — only affects logged-in users; guests are excluded */}
+          <SessionTimeoutHandler />
+          <Routes>
+            {/* Public website pages */}
+            <Route path="/" element={<WebsiteLayout><Home /></WebsiteLayout>} />
+            <Route path="/about" element={<WebsiteLayout><About /></WebsiteLayout>} />
+            <Route path="/products" element={<WebsiteLayout><ProductsPage /></WebsiteLayout>} />
+            <Route path="/services" element={<WebsiteLayout><ServicesPage /></WebsiteLayout>} />
+            <Route path="/resources" element={<WebsiteLayout><ResourcesPage /></WebsiteLayout>} />
+            <Route path="/contact" element={<WebsiteLayout><ContactPage /></WebsiteLayout>} />
 
-          {/* Auth */}
-          <Route path="/login"    element={<Login />} />
-          <Route path="/register" element={<Register />} />
+            {/* Auth */}
+            <Route path="/login"    element={<Login />} />
+            <Route path="/register" element={<Register />} />
 
-          {/* Protected legacy pages */}
-          <Route path="/chat"      element={<ProtectedRoute><Chatbot /></ProtectedRoute>} />
-          <Route path="/documents" element={<ProtectedRoute><Documents /></ProtectedRoute>} />
-        </Routes>
-      </BrowserRouter>
+            {/* Protected legacy pages */}
+            <Route path="/chat"      element={<ProtectedRoute><Chatbot /></ProtectedRoute>} />
+            <Route path="/documents" element={<ProtectedRoute><Documents /></ProtectedRoute>} />
+
+            {/* ── Admin portal — completely separate auth, no Navbar/Footer/Chatbot ── */}
+            <Route path="/admin/login" element={<AdminLogin />} />
+            <Route
+              path="/admin"
+              element={
+                <AdminProtectedRoute>
+                  <AdminLayout />
+                </AdminProtectedRoute>
+              }
+            >
+              {/* /admin → redirect to /admin/dashboard */}
+              <Route index element={<Navigate to="/admin/dashboard" replace />} />
+              <Route path="dashboard"        element={<AdminDashboard />} />
+              <Route path="users"            element={<AdminUsers />} />
+              <Route path="query-analytics"  element={<AdminQueryAnalytics />} />
+              <Route path="products"         element={<AdminProducts />} />
+              <Route path="documents"        element={<AdminDocuments />} />
+              <Route path="downloads"        element={<AdminDownloads />} />
+              <Route path="contact-requests" element={<AdminContactRequests />} />
+              <Route path="unknown-queries"  element={<AdminUnknownQueries />} />
+              <Route path="conversations"    element={<AdminConversations />} />
+              <Route path="ai-analytics"     element={<AdminAIAnalytics />} />
+              <Route path="system-health"    element={<AdminSystemHealth />} />
+              <Route path="settings"         element={<AdminSettings />} />
+            </Route>
+          </Routes>
+        </BrowserRouter>
+      </AdminAuthProvider>
     </AuthProvider>
   );
 }
